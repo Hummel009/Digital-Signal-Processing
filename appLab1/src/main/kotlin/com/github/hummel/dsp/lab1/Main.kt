@@ -1,112 +1,73 @@
 package com.github.hummel.dsp.lab1
 
-import java.io.ByteArrayInputStream
+import javax.sound.sampled.*
 import java.io.File
-import javax.sound.sampled.AudioFileFormat
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioInputStream
-import javax.sound.sampled.AudioSystem
-import kotlin.math.abs
-import kotlin.math.floor
-import kotlin.math.sin
-import kotlin.random.Random
+import kotlin.math.*
 
 fun main() {
-	val duration = 10.0 // Duration in seconds
-	val amplitude = 0.5 // Amplitude
-	val samplingRate = 44100 // Sampling rate (Hz)
-	val frequency = 1200.0 // Frequency of the signal (Hz)
+    val sampleRate = 44100
+    val durationSeconds = 5
+    val amplitude = 0.5f
 
-	val t = DoubleArray((samplingRate * duration).toInt()) { (it / samplingRate).toDouble() }
-	val sinWave = DoubleArray(t.size) { amplitude * sin(2 * Math.PI * frequency * t[it]) }
-	val squareWave = DoubleArray(t.size) { amplitude * if (sin(2 * Math.PI * frequency * t[it]) >= 0) 1.0 else -1.0 }
-	val triangleWave =
-		DoubleArray(t.size) { amplitude * (2 * abs(2 * (t[it] * frequency - floor(t[it] * frequency + 0.5))) - 1) }
-	val sawtoothWave = DoubleArray(t.size) { amplitude * (2 * (t[it] * frequency - floor(0.5 + t[it] * frequency))) }
-	val noise = DoubleArray(t.size) { Random.nextDouble(-amplitude, amplitude) }
+    val sineWave = generateSineWave(sampleRate, durationSeconds, amplitude)
+    val squareWave = generateSquareWave(sampleRate, durationSeconds, amplitude, 0.5)
+    val triangleWave = generateTriangleWave(sampleRate, durationSeconds, amplitude)
+    val sawtoothWave = generateSawtoothWave(sampleRate, durationSeconds, amplitude)
+    val noise = generateNoise(sampleRate, durationSeconds, amplitude)
 
-	writeWavFile("1/sin.wav", sinWave, samplingRate)
-	writeWavFile("1/square.wav", squareWave, samplingRate)
-	writeWavFile("1/triangle.wav", triangleWave, samplingRate)
-	writeWavFile("1/sawtooth.wav", sawtoothWave, samplingRate)
-	writeWavFile("1/noise.wav", noise, samplingRate)
+    saveWav("sine_wave.wav", sineWave)
+    saveWav("square_wave.wav", squareWave)
+    saveWav("triangle_wave.wav", triangleWave)
+    saveWav("sawtooth_wave.wav", sawtoothWave)
+    saveWav("noise.wav", noise)
 
-	println("Files written")
-
-	// Polyphonic signal
-	val polyphonicSignal = DoubleArray(t.size) { sinWave[it] + squareWave[it] + triangleWave[it] + sawtoothWave[it] }
-	normalize(polyphonicSignal)
-	writeWavFile("2/polyphonic_signal.wav", polyphonicSignal, samplingRate)
-
-	println("Polyphonic signal written")
-
-	// Modulation
-	val modulationFrequency = 0.2 // Modulation frequency (Hz)
-	val modulatingSine = DoubleArray(t.size) { sin(2 * Math.PI * modulationFrequency * t[it]) }
-	val modulatingSquare =
-		DoubleArray(t.size) { if (sin(2 * Math.PI * modulationFrequency * t[it]) >= 0) 1.0 else -1.0 }
-	val modulatingTriangle =
-		DoubleArray(t.size) { 2 * abs(2 * (t[it] * modulationFrequency - floor(t[it] * modulationFrequency + 0.5))) - 1 }
-	val modulatingSawtooth =
-		DoubleArray(t.size) { 2 * (t[it] * modulationFrequency - floor(0.5 + t[it] * modulationFrequency)) }
-
-	val signals = arrayOf(sinWave, squareWave, triangleWave, sawtoothWave)
-	val signalsName = arrayOf("sin", "square", "triangle", "sawtooth")
-
-	for (i in signals.indices) {
-		val signal = signals[i]
-
-		// Amplitude Modulation
-		writeModulatedFiles(signal, modulatingSine, "3_${signalsName[i]}/am_sine.wav", samplingRate)
-		writeModulatedFiles(signal, modulatingSquare, "3_${signalsName[i]}/am_square.wav", samplingRate)
-		writeModulatedFiles(signal, modulatingTriangle, "3_${signalsName[i]}/am_triangle.wav", samplingRate)
-		writeModulatedFiles(signal, modulatingSawtooth, "3_${signalsName[i]}/am_sawtooth.wav", samplingRate)
-
-		// Frequency Modulation
-		writeFMFiles(signal, modulatingSine, "3_${signalsName[i]}/fm_sine.wav", samplingRate)
-		writeFMFiles(signal, modulatingSquare, "3_${signalsName[i]}/fm_square.wav", samplingRate)
-		writeFMFiles(signal, modulatingTriangle, "3_${signalsName[i]}/fm_triangle.wav", samplingRate)
-		writeFMFiles(signal, modulatingSawtooth, "3_${signalsName[i]}/fm_sawtooth.wav", samplingRate)
-	}
-
-	println("Modulated signals written.")
+    val polyphonicSignal = sineWave.zip(squareWave) { a, b -> a + b }
+    saveWav("polyphonic_signal.wav", polyphonicSignal.toFloatArray())
 }
 
-fun writeWavFile(filePath: String, signal: DoubleArray, samplingRate: Int) {
-	val audioFormat = AudioFormat(samplingRate.toFloat(), 16, 1, true, false)
-	val bytes = signal.flatMap { shortToBytes((it * 32767).toInt().toShort()).asIterable() }.toByteArray()
-	val file = File(filePath)
-	file.parentFile.mkdirs()
-
-	val byteArrayInputStream = ByteArrayInputStream(bytes)
-
-	val audioInputStream =
-		AudioInputStream(byteArrayInputStream, audioFormat, bytes.size / audioFormat.frameSize.toLong())
-
-	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, file)
+fun generateSineWave(sampleRate: Int, duration: Int, amplitude: Float): List<Float> {
+    val samples = (sampleRate * duration)
+    return List(samples) { i ->
+        amplitude * sin(2 * PI * 440 * i / sampleRate).toFloat() // 440Hz
+    }
 }
 
-fun shortToBytes(value: Short): ByteArray {
-	return byteArrayOf(
-		(value.toInt() and 0xFF).toByte(),
-		(value.toInt() shr 8 and 0xFF).toByte()
-	)
+fun generateSquareWave(sampleRate: Int, duration: Int, amplitude: Float, dutyCycle: Double): List<Float> {
+    val samples = (sampleRate * duration)
+    return List(samples) { i ->
+        if (i % (sampleRate / 440) < (sampleRate / 440 * dutyCycle)) amplitude else -amplitude
+    }
 }
 
-fun writeModulatedFiles(signal: DoubleArray, modulating: DoubleArray, filePath: String, samplingRate: Int) {
-	val modulatedSignal = DoubleArray(signal.size) { (1 + modulating[it]) * signal[it] }
-	writeWavFile(filePath, modulatedSignal, samplingRate)
+fun generateTriangleWave(sampleRate: Int, duration: Int, amplitude: Float): List<Float> {
+    val samples = (sampleRate * duration)
+    return List(samples) { i ->
+        amplitude * (1 - abs(2 * (i % (sampleRate / 440)) / (sampleRate / 440) - 1)).toFloat()
+    }
 }
 
-fun writeFMFiles(signal: DoubleArray, modulating: DoubleArray, filePath: String, samplingRate: Int) {
-	val fmSignal =
-		DoubleArray(signal.size) { sin(2 * Math.PI * (1200 + 50 * modulating[it]) * (it / samplingRate.toDouble())) }
-	writeWavFile(filePath, fmSignal, samplingRate)
+fun generateSawtoothWave(sampleRate: Int, duration: Int, amplitude: Float): List<Float> {
+    val samples = (sampleRate * duration)
+    return List(samples) { i ->
+        amplitude * (2 * (i % (sampleRate / 440)).toFloat() / (sampleRate / 440) - 1)
+    }
 }
 
-fun normalize(signal: DoubleArray) {
-	val maxVal = signal.maxOrNull() ?: 1.0
-	for (i in signal.indices) {
-		signal[i] /= maxVal
-	}
+fun generateNoise(sampleRate: Int, duration: Int, amplitude: Float): List<Float> {
+    val samples = (sampleRate * duration)
+    return List(samples) { amplitude * (Math.random().toFloat() * 2 - 1) }
+}
+
+fun saveWav(filename: String, signal: FloatArray) {
+    val audioFormat = AudioFormat(44100f, 16, 1, true, false)
+    val data = ByteArray(signal.size * 2)
+    for (i in signal.indices) {
+        val value = (signal[i] * Short.MAX_VALUE).toInt().toShort()
+        data[i * 2] = (value.toInt() and 0x00FF).toByte()
+        data[i * 2 + 1] = (value.toInt() shr 8 and 0x00FF).toByte()
+    }
+    val audioInputStream = AudioInputStream(
+        ByteArrayInputStream(data), audioFormat, signal.size.toLong()
+    )
+    AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(filename))
 }
