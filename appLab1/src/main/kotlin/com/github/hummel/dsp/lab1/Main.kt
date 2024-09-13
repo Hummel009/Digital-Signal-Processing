@@ -22,25 +22,11 @@ const val samples: Int = (sampleRate * duration).toInt()
 const val PI: Float = 3.141592653589793f
 
 fun main() {
-	val soundsDir = File("sounds")
-	if (!soundsDir.exists()) {
-		soundsDir.mkdirs()
-	}
+	val soundsDir = mdIfNot("appLab1/sounds")
+	val soundsModDir = mdIfNot("appLab1/sounds_mod")
+	val graphsDir = mdIfNot("appLab1/graphs")
+	val graphsModDir = mdIfNot("appLab1/graphs_mod")
 
-	val soundsModDir = File("sounds_mod")
-	if (!soundsModDir.exists()) {
-		soundsModDir.mkdirs()
-	}
-
-	val graphsDir = File("graphs")
-	if (!graphsDir.exists()) {
-		graphsDir.mkdirs()
-	}
-
-	val graphsModDir = File("graphs_mod")
-	if (!graphsModDir.exists()) {
-		graphsModDir.mkdirs()
-	}
 	var sineWave = generateSineWave()
 	var pulseWave = generatePulseWave()
 	var triangleWave = generateTriangleWave()
@@ -49,13 +35,13 @@ fun main() {
 
 	var polyphonicSignal = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
 
-	saveWav("sounds/sine_wave.wav", sineWave)
-	saveWav("sounds/pulse_wave.wav", pulseWave)
-	saveWav("sounds/triangle_wave.wav", triangleWave)
-	saveWav("sounds/sawtooth_wave.wav", sawtoothWave)
+	saveWav(soundsDir, "sine_wave.wav", sineWave)
+	saveWav(soundsDir, "pulse_wave.wav", pulseWave)
+	saveWav(soundsDir, "triangle_wave.wav", triangleWave)
+	saveWav(soundsDir, "sawtooth_wave.wav", sawtoothWave)
 
-	saveWav("sounds/noise.wav", noise)
-	saveWav("sounds/polyphonic.wav", polyphonicSignal)
+	saveWav(soundsDir, "noise.wav", noise)
+	saveWav(soundsDir, "polyphonic.wav", polyphonicSignal)
 
 	println("Sounds are ready!")
 
@@ -64,10 +50,10 @@ fun main() {
 	val modulatedTriangleWave = modulateAmplitude(triangleWave, generateTriangleModulator())
 	val modulatedSawtoothWave = modulateAmplitude(sawtoothWave, generateSawtoothModulator())
 
-	saveWav("sounds_mod/sine_wave.wav", modulatedSineWave)
-	saveWav("sounds_mod/pulse_wave.wav", modulatedPulseWave)
-	saveWav("sounds_mod/triangle_wave.wav", modulatedTriangleWave)
-	saveWav("sounds_mod/sawtooth_wave.wav", modulatedSawtoothWave)
+	saveWav(soundsModDir, "sine_wave.wav", modulatedSineWave)
+	saveWav(soundsModDir, "pulse_wave.wav", modulatedPulseWave)
+	saveWav(soundsModDir, "triangle_wave.wav", modulatedTriangleWave)
+	saveWav(soundsModDir, "sawtooth_wave.wav", modulatedSawtoothWave)
 
 	println("Modulated sounds are ready!")
 
@@ -81,59 +67,59 @@ fun main() {
 
 	polyphonicSignal = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
 
-	savePlot("graphs/sine_wave.png", sineWave, "Sine Wave")
-	savePlot("graphs/pulse_wave.png", pulseWave, "Pulse Wave")
-	savePlot("graphs/triangle_wave.png", triangleWave, "Triangle Wave")
-	savePlot("graphs/sawtooth_wave.png", sawtoothWave, "Sawtooth Wave")
+	savePlot(graphsDir, "sine_wave.png", sineWave, "Sine Wave")
+	savePlot(graphsDir, "pulse_wave.png", pulseWave, "Pulse Wave")
+	savePlot(graphsDir, "triangle_wave.png", triangleWave, "Triangle Wave")
+	savePlot(graphsDir, "sawtooth_wave.png", sawtoothWave, "Sawtooth Wave")
 
-	savePlot("graphs/noise.png", noise, "Noise")
-	savePlot("graphs/polyphonic.png", noise, "Polyphonic")
+	savePlot(graphsDir, "noise.png", noise, "Noise")
+	savePlot(graphsDir, "polyphonic.png", noise, "Polyphonic")
 
 	println("Graphs are ready!")
 
-	savePlot("graphs_mod/sine_wave.png", modulatedSineWave, "Sine Wave")
-	savePlot("graphs_mod/pulse_wave.png", modulatedPulseWave, "Pulse Wave")
-	savePlot("graphs_mod/triangle_wave.png", modulatedTriangleWave, "Triangle Wave")
-	savePlot("graphs_mod/sawtooth_wave.png", modulatedSawtoothWave, "Sawtooth Wave")
+	savePlot(graphsModDir, "sine_wave.png", modulatedSineWave, "Sine Wave")
+	savePlot(graphsModDir, "pulse_wave.png", modulatedPulseWave, "Pulse Wave")
+	savePlot(graphsModDir, "triangle_wave.png", modulatedTriangleWave, "Triangle Wave")
+	savePlot(graphsModDir, "sawtooth_wave.png", modulatedSawtoothWave, "Sawtooth Wave")
 
 	println("Modulated graphs are ready!")
 
 }
 
-fun generateSineWave(): FloatArray {
+private fun generateSineWave(): FloatArray {
 	return FloatArray(samples) { n ->
 		amplitude * sin(2 * PI * frequency * n / sampleRate + phase)
 	}
 }
 
-fun generatePulseWave(): FloatArray {
+private fun generatePulseWave(): FloatArray {
 	return FloatArray(samples) { n ->
 		val modValue = (2 * PI * frequency * n / sampleRate + phase) % (2 * PI)
 		if (modValue / (2 * PI) <= dutyCycle) amplitude else -amplitude
 	}
 }
 
-fun generateTriangleWave(): FloatArray {
+private fun generateTriangleWave(): FloatArray {
 	return FloatArray(samples) { n ->
 		val modValue = (2 * PI * frequency * n / sampleRate + phase + 3 * PI / 2) % (2 * PI)
 		((2 * amplitude / PI) * (abs(modValue - PI) - (PI / 2)))
 	}
 }
 
-fun generateSawtoothWave(): FloatArray {
+private fun generateSawtoothWave(): FloatArray {
 	return FloatArray(samples) { n ->
 		val modValue = (2 * PI * frequency * n / sampleRate + phase + PI) % (2 * PI)
 		((amplitude / PI) * (modValue - PI))
 	}
 }
 
-fun generateNoise(): FloatArray {
+private fun generateNoise(): FloatArray {
 	return FloatArray(samples) {
 		amplitude * (Math.random().toFloat() * 2 - 1)
 	}
 }
 
-fun saveWav(filename: String, signal: FloatArray) {
+private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	val audioFormat = AudioFormat(sampleRate, 16, 1, true, false)
 	val data = ByteArray(signal.size * 2)
 	for (i in signal.indices) {
@@ -144,10 +130,10 @@ fun saveWav(filename: String, signal: FloatArray) {
 	val audioInputStream = AudioInputStream(
 		ByteArrayInputStream(data), audioFormat, signal.size.toLong()
 	)
-	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(filename))
+	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir, filename))
 }
 
-fun savePlot(filename: String, signal: FloatArray, title: String, skip: Int = 100) {
+private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
 	val xData = (0 until samples step skip).map { it.toDouble() / sampleRate }
 	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
 
@@ -156,5 +142,13 @@ fun savePlot(filename: String, signal: FloatArray, title: String, skip: Int = 10
 	chart.xAxisTitle = "Time (s)"
 	chart.yAxisTitle = "Amplitude"
 	chart.addSeries(title, xData.toDoubleArray(), yData.toDoubleArray())
-	BitmapEncoder.saveBitmap(chart, filename, BitmapFormat.PNG)
+	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.PNG)
+}
+
+private fun mdIfNot(path: String): File {
+	val soundsDir = File(path)
+	if (!soundsDir.exists()) {
+		soundsDir.mkdirs()
+	}
+	return soundsDir
 }
