@@ -3,9 +3,6 @@ package com.github.hummel.dsp.lab1
 import kotlin.math.abs
 import kotlin.math.sin
 
-const val amplitude: Float = 0.5f //A
-var frequency: Float = 880.0f //f
-
 fun generateSineWave(): FloatArray {
 	return FloatArray(samples) { n ->
 		amplitude * sin(2 * PI * frequency * n / sampleRate + phase)

@@ -3,9 +3,6 @@ package com.github.hummel.dsp.lab1
 import kotlin.math.abs
 import kotlin.math.sin
 
-const val modulatorAmplitude: Float = 0.25f // A
-var modulatorFrequency: Float = 220.0f // f
-
 fun modulateAmplitude(signal: FloatArray, modulator: FloatArray): FloatArray {
 	require(signal.size == modulator.size) { "Arrays must be of the same length" }
 

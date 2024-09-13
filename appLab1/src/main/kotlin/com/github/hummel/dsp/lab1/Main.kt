@@ -7,15 +7,20 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.*
 
+const val PI: Float = 3.141592653589793f
+
 const val sampleRate: Float = 44100.0f //N
 const val phase: Float = 0.0f //ф
 const val dutyCycle: Float = 0.5f //d
-
 const val duration: Float = 5.0f //sec
 
-const val samples: Int = (sampleRate * duration).toInt()
+var modulatorAmplitude: Float = 0.25f // A
+var modulatorFrequency: Float = 220.0f // f
 
-const val PI: Float = 3.141592653589793f
+var amplitude: Float = 0.5f //A
+var frequency: Float = 880.0f //f
+
+const val samples: Int = (sampleRate * duration).toInt()
 
 fun main() {
 	val soundsDir = mdIfNot("appLab1/1_sounds_wave")
@@ -68,10 +73,21 @@ fun main() {
 	triangleModulator = generateTriangleModulator()
 	sawtoothModulator = generateSawtoothModulator()
 
-	modulatedSineWave = modulateAmplitude(sineWave, sineModulator)
-	modulatedPulseWave = modulateAmplitude(pulseWave, pulseModulator)
-	modulatedTriangleWave = modulateAmplitude(triangleWave, triangleModulator)
-	modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
+	println("Enter mode: amplitude or frequency")
+
+	val input = readln()
+
+	if (input.lowercase() == "amplitude") {
+		modulatedSineWave = modulateAmplitude(sineWave, sineModulator)
+		modulatedPulseWave = modulateAmplitude(pulseWave, pulseModulator)
+		modulatedTriangleWave = modulateAmplitude(triangleWave, triangleModulator)
+		modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
+	} else {
+		modulatedSineWave = modulateFrequencySineWave(sineModulator)
+		modulatedPulseWave = modulateFrequencyPulseWave(pulseModulator)
+		modulatedTriangleWave = modulateFrequencyTriangleWave(triangleModulator)
+		modulatedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
+	}
 
 	savePlot(graphsDir, "sine_wave.png", sineWave, "Sine Wave")
 	savePlot(graphsDir, "pulse_wave.png", pulseWave, "Pulse Wave")
