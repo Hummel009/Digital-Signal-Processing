@@ -8,21 +8,39 @@ import java.io.File
 import javax.sound.sampled.*
 import kotlin.math.*
 
-private const val sampleRate: Float = 44100.0f //N
+const val sampleRate: Float = 44100.0f //N
+const val amplitude: Float = 0.5f //A
+const val phase: Float = 0.0f //ф
+const val dutyCycle: Float = 0.5f //d
 
-private const val amplitude: Float = 0.5f //A
-private const val phase: Float = 0.0f //ф
-private const val dutyCycle: Float = 0.5f //d
+var frequency: Float = 440.0f //f
 
-private var frequency: Float = 440.0f //f
+const val duration: Float = 5.0f //sec
 
-private const val duration: Float = 5.0f //sec
+const val samples: Int = (sampleRate * duration).toInt()
 
-private const val PI: Float = 3.141592653589793f
-
-private const val samples: Int = (sampleRate * duration).toInt()
+const val PI: Float = 3.141592653589793f
 
 fun main() {
+	val soundsDir = File("sounds")
+	if (!soundsDir.exists()) {
+		soundsDir.mkdirs()
+	}
+
+	val soundsModDir = File("sounds_mod")
+	if (!soundsModDir.exists()) {
+		soundsModDir.mkdirs()
+	}
+
+	val graphsDir = File("graphs")
+	if (!graphsDir.exists()) {
+		graphsDir.mkdirs()
+	}
+
+	val graphsModDir = File("graphs_mod")
+	if (!graphsModDir.exists()) {
+		graphsModDir.mkdirs()
+	}
 	var sineWave = generateSineWave()
 	var pulseWave = generatePulseWave()
 	var triangleWave = generateTriangleWave()
@@ -31,24 +49,27 @@ fun main() {
 
 	var polyphonicSignal = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
 
-	val soundsDir = File("sounds")
-	if (!soundsDir.exists()) {
-		soundsDir.mkdirs()
-	}
-
-	val graphsDir = File("graphs")
-	if (!graphsDir.exists()) {
-		graphsDir.mkdirs()
-	}
-
 	saveWav("sounds/sine_wave.wav", sineWave)
 	saveWav("sounds/pulse_wave.wav", pulseWave)
 	saveWav("sounds/triangle_wave.wav", triangleWave)
 	saveWav("sounds/sawtooth_wave.wav", sawtoothWave)
+
 	saveWav("sounds/noise.wav", noise)
 	saveWav("sounds/polyphonic.wav", polyphonicSignal)
 
 	println("Sounds are ready!")
+
+	val modulatedSineWave = modulateAmplitude(sineWave, generateSineModulator())
+	val modulatedPulseWave = modulateAmplitude(pulseWave, generatePulseModulator())
+	val modulatedTriangleWave = modulateAmplitude(triangleWave, generateTriangleModulator())
+	val modulatedSawtoothWave = modulateAmplitude(sawtoothWave, generateSawtoothModulator())
+
+	saveWav("sounds_mod/sine_wave.wav", modulatedSineWave)
+	saveWav("sounds_mod/pulse_wave.wav", modulatedPulseWave)
+	saveWav("sounds_mod/triangle_wave.wav", modulatedTriangleWave)
+	saveWav("sounds_mod/sawtooth_wave.wav", modulatedSawtoothWave)
+
+	println("Modulated sounds are ready!")
 
 	frequency = 1.0f
 
@@ -64,10 +85,19 @@ fun main() {
 	savePlot("graphs/pulse_wave.png", pulseWave, "Pulse Wave")
 	savePlot("graphs/triangle_wave.png", triangleWave, "Triangle Wave")
 	savePlot("graphs/sawtooth_wave.png", sawtoothWave, "Sawtooth Wave")
+
 	savePlot("graphs/noise.png", noise, "Noise")
 	savePlot("graphs/polyphonic.png", noise, "Polyphonic")
 
 	println("Graphs are ready!")
+
+	savePlot("graphs_mod/sine_wave.png", modulatedSineWave, "Sine Wave")
+	savePlot("graphs_mod/pulse_wave.png", modulatedPulseWave, "Pulse Wave")
+	savePlot("graphs_mod/triangle_wave.png", modulatedTriangleWave, "Triangle Wave")
+	savePlot("graphs_mod/sawtooth_wave.png", modulatedSawtoothWave, "Sawtooth Wave")
+
+	println("Modulated graphs are ready!")
+
 }
 
 fun generateSineWave(): FloatArray {
