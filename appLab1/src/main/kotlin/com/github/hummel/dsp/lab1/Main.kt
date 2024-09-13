@@ -130,7 +130,7 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	val audioInputStream = AudioInputStream(
 		ByteArrayInputStream(data), audioFormat, signal.size.toLong()
 	)
-	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir, filename))
+	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename))
 }
 
 private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
