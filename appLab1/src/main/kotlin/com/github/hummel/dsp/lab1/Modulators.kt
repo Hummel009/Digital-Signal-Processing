@@ -14,15 +14,6 @@ fun modulateAmplitude(signal: FloatArray, modulator: FloatArray): FloatArray {
 	}
 }
 
-//fun modulateFrequency(signal: FloatArray, modulator: FloatArray): FloatArray {
-//	require(signal.size == modulator.size) { "Arrays must be of the same length" }
-//
-//	return FloatArray(signal.size) { n ->
-//		val modulatedFrequency = frequency * (1 + modulator[n])
-//		amplitude * sin(2 * PI * modulatedFrequency * n / sampleRate)
-//	}
-//}
-
 fun generateSineModulator(): FloatArray {
 	return FloatArray(samples) { n ->
 		modulatorAmplitude * sin(2 * PI * modulatorFrequency * n / sampleRate + phase)
