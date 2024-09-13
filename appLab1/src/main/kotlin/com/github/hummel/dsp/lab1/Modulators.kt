@@ -3,46 +3,49 @@ package com.github.hummel.dsp.lab1
 import kotlin.math.abs
 import kotlin.math.sin
 
+const val modulatorAmplitude: Float = 0.25f // A
+var modulatorFrequency: Float = 220.0f // f
+
 fun modulateAmplitude(signal: FloatArray, modulator: FloatArray): FloatArray {
+	require(signal.size == modulator.size) { "Arrays must be of the same length" }
+
 	return FloatArray(signal.size) { n ->
-		signal[n] * (1 + modulator[n]) // Модуляция амплитуды
+		signal[n] * (1 + modulator[n])
 	}
 }
 
-fun modulateFrequency(signal: FloatArray, modulator: FloatArray): FloatArray {
-	return FloatArray(signal.size) { n ->
-		val modulatedFrequency = frequency * (1 + modulator[n]) // Модуляция частоты
-		amplitude * sin(2 * PI * modulatedFrequency * n / sampleRate)
-	}
-}
+//fun modulateFrequency(signal: FloatArray, modulator: FloatArray): FloatArray {
+//	require(signal.size == modulator.size) { "Arrays must be of the same length" }
+//
+//	return FloatArray(signal.size) { n ->
+//		val modulatedFrequency = frequency * (1 + modulator[n])
+//		amplitude * sin(2 * PI * modulatedFrequency * n / sampleRate)
+//	}
+//}
 
 fun generateSineModulator(): FloatArray {
-	val modulatorFrequency = 2.0f // Частота модулирующего сигнала
 	return FloatArray(samples) { n ->
-		0.5f * sin(2 * PI * modulatorFrequency * n / sampleRate) // Модулирующий сигнал
+		modulatorAmplitude * sin(2 * PI * modulatorFrequency * n / sampleRate + phase)
 	}
 }
 
 fun generatePulseModulator(): FloatArray {
-	val modulatorFrequency = 2.0f // Частота модулирующего сигнала
 	return FloatArray(samples) { n ->
-		val modValue = (2 * PI * modulatorFrequency * n / sampleRate) % (2 * PI)
-		if (modValue / (2 * PI) <= 0.5) 0.5f else -0.5f // Импульсный сигнал с 50% скважностью
+		val modValue = (2 * PI * modulatorFrequency * n / sampleRate + phase) % (2 * PI)
+		if (modValue / (2 * PI) <= dutyCycle) modulatorAmplitude else -modulatorAmplitude
 	}
 }
 
 fun generateTriangleModulator(): FloatArray {
-	val modulatorFrequency = 2.0f // Частота модулирующего сигнала
 	return FloatArray(samples) { n ->
-		val modValue = (2 * PI * modulatorFrequency * n / sampleRate) % (2 * PI)
-		(2 / PI) * (abs(modValue - PI) - (PI / 2)) // Треугольный сигнал
+		val modValue = (2 * PI * modulatorFrequency * n / sampleRate + phase + 3 * PI / 2) % (2 * PI)
+		(2 * modulatorAmplitude / PI) * (abs(modValue - PI) - (PI / 2))
 	}
 }
 
 fun generateSawtoothModulator(): FloatArray {
-	val modulatorFrequency = 2.0f // Частота модулирующего сигнала
 	return FloatArray(samples) { n ->
-		val modValue = (2 * PI * modulatorFrequency * n / sampleRate) % (2 * PI)
-		(1 / PI) * (modValue - PI) // Пилообразный сигнал
+		val modValue = (2 * PI * modulatorFrequency * n / sampleRate + phase + PI) % (2 * PI)
+		(modulatorAmplitude / PI) * (modValue - PI)
 	}
 }
