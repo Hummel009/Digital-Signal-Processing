@@ -1,4 +1,4 @@
-package com.github.hummel.dsp.lab1
+package com.github.hummel.dsp.lab2
 
 import org.knowm.xchart.BitmapEncoder
 import org.knowm.xchart.BitmapEncoder.BitmapFormat
@@ -60,6 +60,17 @@ fun main() {
 	saveWav(soundsModWaveDir, "triangle_mod_wave.wav", modulatedTriangleWave)
 	saveWav(soundsModWaveDir, "sawtooth_mod_wave.wav", modulatedSawtoothWave)
 
+	var transformed = discreteFourierTransform(sineWave)
+	var amplitudeSpec = amplitudeSpectrum(transformed)
+	var phaseSpec = phaseSpectrum(transformed)
+
+	var reconstructedSignal = inverseDiscreteFourierTransform(transformed)
+
+	saveWav(soundsModWaveDir, "sine_mod_wave_reconstr.wav", reconstructedSignal)
+
+	println(amplitudeSpec.joinToString(separator = ", "))
+	println(phaseSpec.joinToString(separator = ", "))
+
 	frequency /= 440.0f
 	modulatorFrequency /= 440.0f
 
@@ -107,6 +118,17 @@ fun main() {
 	savePlot(graphsModWaveDir, "pulse_mod_wave.png", modulatedPulseWave, "Pulse Mod Wave")
 	savePlot(graphsModWaveDir, "triangle_mod_wave.png", modulatedTriangleWave, "Triangle Mod Wave")
 	savePlot(graphsModWaveDir, "sawtooth_mod_wave.png", modulatedSawtoothWave, "Sawtooth Mod Wave")
+
+	transformed = discreteFourierTransform(sineWave)
+	amplitudeSpec = amplitudeSpectrum(transformed)
+	phaseSpec = phaseSpectrum(transformed)
+
+	reconstructedSignal = inverseDiscreteFourierTransform(transformed)
+
+	savePlot(graphsModWaveDir, "sine_mod_wave_reconstr.png", reconstructedSignal, "Sine Mod Wave")
+
+	println(amplitudeSpec.joinToString(separator = ", "))
+	println(phaseSpec.joinToString(separator = ", "))
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
