@@ -7,6 +7,8 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.*
 
+//https://www.desmos.com/calculator/vmgatudfmf?lang=ru
+
 const val PI: Float = 3.141592653589793f
 
 const val sampleRate: Float = 44100.0f //N
@@ -105,7 +107,6 @@ fun main() {
 	savePlot(graphsModWaveDir, "pulse_mod_wave.png", modulatedPulseWave, "Pulse Mod Wave")
 	savePlot(graphsModWaveDir, "triangle_mod_wave.png", modulatedTriangleWave, "Triangle Mod Wave")
 	savePlot(graphsModWaveDir, "sawtooth_mod_wave.png", modulatedSawtoothWave, "Sawtooth Mod Wave")
-
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
