@@ -1,4 +1,3 @@
-
 ' 1000 'THE FAST FOURIER TRANSFORM
 ' 1010 'Upon entry, N% contains the number of points in the DFT, REX[ ] and
 ' 1020 'IMX[ ] contain the real and imaginary parts of the input. Upon return,

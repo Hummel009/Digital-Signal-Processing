@@ -11,35 +11,38 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 fun discreteFourierTransform(signal: FloatArray): FloatArray {
-	val n = signal.size
-	val output = FloatArray(2 * n)
+	val n = signal.size / 2
+	val output = FloatArray(n * 2)
 
 	for (k in 0 until n) {
-		var real = 0.0
-		var imag = 0.0
+		var real = 0.0f
+		var imag = 0.0f
 		for (t in 0 until n) {
-			val angle = 2.0 * Math.PI * k * t / n
-			real += signal[t] * cos(angle)
-			imag -= signal[t] * sin(angle)
+			val angle = 2 * PI * t * k / n
+			real += signal[2 * t] * cos(angle) - signal[2 * t + 1] * sin(angle)
+			imag += signal[2 * t] * sin(angle) + signal[2 * t + 1] * cos(angle)
 		}
-		output[2 * k] = real.toFloat()
-		output[2 * k + 1] = imag.toFloat()
+		output[2 * k] = real
+		output[2 * k + 1] = imag
 	}
 
 	return output
 }
 
-fun inverseDiscreteFourierTransform(frequency: FloatArray): FloatArray {
-	val n = frequency.size / 2
-	val output = FloatArray(n)
+fun inverseDiscreteFourierTransform(signal: FloatArray): FloatArray {
+	val n = signal.size / 2
+	val output = FloatArray(n * 2)
 
 	for (t in 0 until n) {
-		var real = 0.0
+		var real = 0.0f
+		var imag = 0.0f
 		for (k in 0 until n) {
-			val angle = 2.0 * Math.PI * k * t / n
-			real += frequency[2 * k] * cos(angle) + frequency[2 * k + 1] * sin(angle)
+			val angle = 2 * PI * t * k / n
+			real += signal[2 * k] * cos(angle) - signal[2 * k + 1] * sin(angle)
+			imag += signal[2 * k] * sin(angle) + signal[2 * k + 1] * cos(angle)
 		}
-		output[t] = (real / n).toFloat()
+		output[2 * t] = real / n
+		output[2 * t + 1] = imag / n
 	}
 
 	return output
@@ -47,16 +50,11 @@ fun inverseDiscreteFourierTransform(frequency: FloatArray): FloatArray {
 
 fun fastFourierTransform(signal: FloatArray, fortran: Boolean): FloatArray {
 	val n = signal.size
-	val real = DoubleArray(n)
-	val imag = DoubleArray(n)
-
-	for (i in signal.indices) {
-		real[i] = signal[i].toDouble()
-		imag[i] = 0.0
-	}
+	val real = DoubleArray(n) { signal[it].toDouble() }
+	val imag = DoubleArray(n) { 0.0 }
 
 	if (fortran) {
-		basicFourierTransform(n, real, imag)
+		fortranFourierTransform(n, real, imag)
 	} else {
 		FastFouriers.BEST.transform(real, imag)
 	}
@@ -80,7 +78,7 @@ fun inverseFastFourierTransform(complexSignal: FloatArray, fortran: Boolean): Fl
 	}
 
 	if (fortran) {
-		basicFourierTransform(n, real, imag)
+		fortranFourierTransform(n, real, imag)
 	} else {
 		FastFouriers.BEST.transform(real, imag)
 	}
@@ -119,7 +117,7 @@ fun lowPassFilter(signal: FloatArray, cutoffFreq: Float): FloatArray {
 }
 
 @Suppress("NAME_SHADOWING", "serial")
-private fun basicFourierTransform(n: Int, rex: DoubleArray, imx: DoubleArray) {
+private fun fortranFourierTransform(n: Int, rex: DoubleArray, imx: DoubleArray) {
 	var k: Int
 	var tr: Double
 	var ti: Double

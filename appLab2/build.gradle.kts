@@ -14,6 +14,8 @@ val embed: Configuration by configurations.creating
 dependencies {
 	embed("org.jetbrains.kotlin:kotlin-stdlib:latest.release")
 	embed("com.tambapps.fft4j:fft4j:latest.release")
+	embed("org.knowm.xchart:xchart:latest.release")
+	implementation("org.knowm.xchart:xchart:latest.release")
 	implementation("com.tambapps.fft4j:fft4j:latest.release")
 }
 
