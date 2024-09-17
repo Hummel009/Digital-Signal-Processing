@@ -17,7 +17,7 @@ const val dutyCycle: Float = 0.5f //d
 const val duration: Float = 5.0f //sec
 
 var modulatorAmplitude: Float = 0.25f // A
-var modulatorFrequency: Float = 220.0f // f
+var modulatorFrequency: Float = 1.0f // f
 
 var amplitude: Float = 0.5f //A
 var frequency: Float = 880.0f //f
@@ -31,6 +31,10 @@ fun main() {
 	val graphsModWaveDir = mdIfNot("output/3_graphs_mod_wave")
 	val graphsModDir = mdIfNot("output/2_graphs_mod")
 
+	println("Which mode: «amplitude» or «frequency»")
+
+	val input = readln()
+
 	var sineWave = generateSineWave()
 	var pulseWave = generatePulseWave()
 	var triangleWave = generateTriangleWave()
@@ -43,10 +47,22 @@ fun main() {
 	var triangleModulator = generateTriangleModulator()
 	var sawtoothModulator = generateSawtoothModulator()
 
-	var modulatedSineWave = modulateAmplitude(sineWave, sineModulator)
-	var modulatedPulseWave = modulateAmplitude(pulseWave, pulseModulator)
-	var modulatedTriangleWave = modulateAmplitude(triangleWave, triangleModulator)
-	var modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
+	var modulatedSineWave: FloatArray
+	var modulatedPulseWave: FloatArray
+	var modulatedTriangleWave: FloatArray
+	var modulatedSawtoothWave: FloatArray
+
+	if (input.lowercase() == "amplitude") {
+		modulatedSineWave = modulateAmplitude(sineWave, sawtoothModulator)
+		modulatedPulseWave = modulateAmplitude(pulseWave, sawtoothModulator)
+		modulatedTriangleWave = modulateAmplitude(triangleWave, sawtoothModulator)
+		modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
+	} else {
+		modulatedSineWave = modulateFrequencySineWave(sawtoothModulator)
+		modulatedPulseWave = modulateFrequencyPulseWave()
+		modulatedTriangleWave = modulateFrequencyTriangleWave(sawtoothModulator)
+		modulatedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
+	}
 
 	saveWav(soundsDir, "sine_wave.wav", sineWave)
 	saveWav(soundsDir, "pulse_wave.wav", pulseWave)
@@ -75,19 +91,15 @@ fun main() {
 	triangleModulator = generateTriangleModulator()
 	sawtoothModulator = generateSawtoothModulator()
 
-	println("Which mode: «amplitude» or «frequency»")
-
-	val input = readln()
-
 	if (input.lowercase() == "amplitude") {
-		modulatedSineWave = modulateAmplitude(sineWave, sineModulator)
-		modulatedPulseWave = modulateAmplitude(pulseWave, pulseModulator)
-		modulatedTriangleWave = modulateAmplitude(triangleWave, triangleModulator)
+		modulatedSineWave = modulateAmplitude(sineWave, sawtoothModulator)
+		modulatedPulseWave = modulateAmplitude(pulseWave, sawtoothModulator)
+		modulatedTriangleWave = modulateAmplitude(triangleWave, sawtoothModulator)
 		modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
 	} else {
-		modulatedSineWave = modulateFrequencySineWave(sineModulator)
-		modulatedPulseWave = modulateFrequencyPulseWave(pulseModulator)
-		modulatedTriangleWave = modulateFrequencyTriangleWave(triangleModulator)
+		modulatedSineWave = modulateFrequencySineWave(sawtoothModulator)
+		modulatedPulseWave = modulateFrequencyPulseWave()
+		modulatedTriangleWave = modulateFrequencyTriangleWave(sawtoothModulator)
 		modulatedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
 	}
 
