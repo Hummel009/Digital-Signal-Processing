@@ -11,6 +11,12 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 data class Complex(val real: Float, val imaginary: Float) {
+	val magnitude: Float
+		get() = sqrt(real * real + imaginary * imaginary)
+
+	val phase: Float
+		get() = atan2(imaginary, real)
+
 	operator fun plus(other: Complex) = Complex(real + other.real, imaginary + other.imaginary)
 
 	operator fun times(scalar: Float) = Complex(real * scalar, imaginary * scalar)
@@ -105,18 +111,6 @@ fun phaseSpectrum(complexSignal: FloatArray): FloatArray {
 	return FloatArray(n) { i ->
 		atan2(complexSignal[2 * i + 1], complexSignal[2 * i])
 	}
-}
-
-fun lowPassFilter(signal: FloatArray, cutoffFreq: Float): FloatArray {
-	val result = FloatArray(signal.size)
-	val rc = 1.0f / (cutoffFreq * 2 * PI)
-	val alpha = 1.0f / (rc + 1)
-
-	result[0] = signal[0]
-	for (i in 1 until signal.size) {
-		result[i] = result[i - 1] + alpha * (signal[i] - result[i - 1])
-	}
-	return result
 }
 
 @Suppress("NAME_SHADOWING", "serial")

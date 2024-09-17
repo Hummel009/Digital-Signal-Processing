@@ -66,6 +66,20 @@ fun main() {
 
 	error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
 	println("Average FFT Reconstruction Error: ${String.format("%.8f", error)}")
+
+	val amplitudeSpectrum = computeAmplitudeSpectrum(transformed)
+	val phaseSpectrum = computePhaseSpectrum(transformed)
+
+	savePlot(graphsDir, "amplitude_spectrum.png", amplitudeSpectrum, "Amplitude Spectrum")
+	savePlot(graphsDir, "phase_spectrum.png", phaseSpectrum, "Phase Spectrum")
+
+	val lowPassFiltered = lowPassFilter(signal, cutoffFrequency = 0.5f)
+	val highPassFiltered = highPassFilter(signal, cutoffFrequency = 0.5f)
+	val bandPassFiltered = bandPassFilter(signal, cutoffFrequencyL = 0.4f, cutoffFrequencyH = 0.6f)
+
+	savePlot(graphsDir, "signal_low_pass.png", lowPassFiltered, "Low Pass Filtered")
+	savePlot(graphsDir, "signal_high_pass.png", highPassFiltered, "High Pass Filtered")
+	savePlot(graphsDir, "signal_band_pass.png", bandPassFiltered, "Band Pass Filtered")
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
