@@ -41,7 +41,7 @@ fun main() {
 	saveWav(soundsDir, "noise.wav", noise)
 	saveWav(soundsDir, "polyphonic.wav", polyphonic)
 
-	val signal = sineWave
+	var signal = sineWave
 
 	saveWav(soundsDir, "signal_orig.wav", signal)
 	savePlot(graphsDir, "signal_orig.png", signal, "Signal ORG")
@@ -67,15 +67,20 @@ fun main() {
 	error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
 	println("Average FFT Reconstruction Error: ${String.format("%.8f", error)}")
 
+	signal = noise
+
+	transformed = fastFourierTransform(signal, input == "fortran")
+	reconstructedSignal = inverseFastFourierTransform(transformed, input == "fortran")
+
 	val amplitudeSpectrum = computeAmplitudeSpectrum(transformed)
 	val phaseSpectrum = computePhaseSpectrum(transformed)
 
 	savePlot(graphsDir, "amplitude_spectrum.png", amplitudeSpectrum, "Amplitude Spectrum")
 	savePlot(graphsDir, "phase_spectrum.png", phaseSpectrum, "Phase Spectrum")
 
-	val lowPassFiltered = lowPassFilter(signal, cutoffFrequency = 0.5f)
-	val highPassFiltered = highPassFilter(signal, cutoffFrequency = 0.5f)
-	val bandPassFiltered = bandPassFilter(signal, cutoffFrequencyL = 0.4f, cutoffFrequencyH = 0.6f)
+	val lowPassFiltered = lowPassFilter(amplitudeSpectrum, cutoffFrequency = 50.0f)
+	val highPassFiltered = highPassFilter(amplitudeSpectrum, cutoffFrequency = 50.0f)
+	val bandPassFiltered = bandPassFilter(amplitudeSpectrum, cutoffFrequencyL = 25.0f, cutoffFrequencyH = 75.0f)
 
 	savePlot(graphsDir, "signal_low_pass.png", lowPassFiltered, "Low Pass Filtered")
 	savePlot(graphsDir, "signal_high_pass.png", highPassFiltered, "High Pass Filtered")
