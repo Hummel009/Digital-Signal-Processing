@@ -1,43 +1,108 @@
+@file:Suppress("unused")
+
 package com.github.hummel.dsp.lab2
 
-import org.jtransforms.fft.DoubleFFT_1D
+import com.tambapps.fft4j.FastFouriers
 import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.log2
+import kotlin.math.pow
+import kotlin.math.sin
 import kotlin.math.sqrt
 
-fun discreteFourierTransform(signal: FloatArray): DoubleArray {
+fun discreteFourierTransform(signal: FloatArray): FloatArray {
 	val n = signal.size
-	val fft = DoubleFFT_1D(n.toLong())
-	val complexSignal = DoubleArray(2 * n)
+	val output = FloatArray(2 * n)
+
+	for (k in 0 until n) {
+		var real = 0.0
+		var imag = 0.0
+		for (t in 0 until n) {
+			val angle = 2.0 * Math.PI * k * t / n
+			real += signal[t] * cos(angle)
+			imag -= signal[t] * sin(angle)
+		}
+		output[2 * k] = real.toFloat()
+		output[2 * k + 1] = imag.toFloat()
+	}
+
+	return output
+}
+
+fun inverseDiscreteFourierTransform(frequency: FloatArray): FloatArray {
+	val n = frequency.size / 2
+	val output = FloatArray(n)
+
+	for (t in 0 until n) {
+		var real = 0.0
+		for (k in 0 until n) {
+			val angle = 2.0 * Math.PI * k * t / n
+			real += frequency[2 * k] * cos(angle) + frequency[2 * k + 1] * sin(angle)
+		}
+		output[t] = (real / n).toFloat()
+	}
+
+	return output
+}
+
+fun fastFourierTransform(signal: FloatArray, fortran: Boolean): FloatArray {
+	val n = signal.size
+	val real = DoubleArray(n)
+	val imag = DoubleArray(n)
 
 	for (i in signal.indices) {
-		complexSignal[2 * i] = signal[i].toDouble() // реальная часть
-		complexSignal[2 * i + 1] = 0.0 // мнимая часть
+		real[i] = signal[i].toDouble()
+		imag[i] = 0.0
 	}
 
-	fft.realForwardFull(complexSignal)
-	return complexSignal
-}
+	if (fortran) {
+		basicFourierTransform(n, real, imag)
+	} else {
+		FastFouriers.BEST.transform(real, imag)
+	}
 
-fun inverseDiscreteFourierTransform(complexSignal: DoubleArray): FloatArray {
-	val n = complexSignal.size / 2
-	val fft = DoubleFFT_1D(n.toLong())
-	val output = complexSignal.clone()
-
-	fft.realInverseFull(output, true)
-	return FloatArray(n) { output[2 * it].toFloat() }.map { it / n.toFloat() }.toFloatArray()
-}
-
-fun amplitudeSpectrum(complexSignal: DoubleArray): FloatArray {
-	val n = complexSignal.size / 2
-	return FloatArray(n) { i ->
-		sqrt(complexSignal[2 * i] * complexSignal[2 * i] + complexSignal[2 * i + 1] * complexSignal[2 * i + 1]).toFloat()
+	return FloatArray(n * 2).apply {
+		for (i in 0 until n) {
+			this[2 * i] = real[i].toFloat()
+			this[2 * i + 1] = imag[i].toFloat()
+		}
 	}
 }
 
-fun phaseSpectrum(complexSignal: DoubleArray): FloatArray {
+fun inverseFastFourierTransform(complexSignal: FloatArray, fortran: Boolean): FloatArray {
+	val n = complexSignal.size / 2
+	val real = DoubleArray(n)
+	val imag = DoubleArray(n)
+
+	for (i in 0 until n) {
+		real[i] = complexSignal[2 * i].toDouble()
+		imag[i] = complexSignal[2 * i + 1].toDouble()
+	}
+
+	if (fortran) {
+		basicFourierTransform(n, real, imag)
+	} else {
+		FastFouriers.BEST.transform(real, imag)
+	}
+
+	return FloatArray(n).apply {
+		for (i in indices) {
+			this[i] = (real[i] / n).toFloat()
+		}
+	}
+}
+
+fun amplitudeSpectrum(complexSignal: FloatArray): FloatArray {
 	val n = complexSignal.size / 2
 	return FloatArray(n) { i ->
-		atan2(complexSignal[2 * i + 1], complexSignal[2 * i]).toFloat()
+		sqrt(complexSignal[2 * i] * complexSignal[2 * i] + complexSignal[2 * i + 1] * complexSignal[2 * i + 1])
+	}
+}
+
+fun phaseSpectrum(complexSignal: FloatArray): FloatArray {
+	val n = complexSignal.size / 2
+	return FloatArray(n) { i ->
+		atan2(complexSignal[2 * i + 1], complexSignal[2 * i])
 	}
 }
 
@@ -52,3 +117,136 @@ fun lowPassFilter(signal: FloatArray, cutoffFreq: Float): FloatArray {
 	}
 	return result
 }
+
+@Suppress("NAME_SHADOWING", "serial")
+private fun basicFourierTransform(n: Int, rex: DoubleArray, imx: DoubleArray) {
+	var k: Int
+	var tr: Double
+	var ti: Double
+	var le: Int
+	var le2: Int
+	var ur: Double
+	var ui: Double
+	var sr: Double
+	var si: Double
+	var jm1: Int
+	var ip: Int
+
+	//Set constants
+	val pi = Math.PI //1050
+	val nm1 = n - 1 //1060
+	val nd2 = n / 2 //1070
+	val m = log2(n.toDouble()).toInt() //1080
+	var j = nd2 //1090
+
+	//Bit reversal sorting
+	class GoTo1190 : Exception()
+	nextI@ for (i in 1 until n - 1) { //1110
+		try {
+			if (i >= j) throw GoTo1190() //1120
+			tr = rex[j] //1130
+			ti = imx[j] //1140
+			rex[j] = rex[i] //1150
+			imx[j] = imx[i] //1160
+			rex[i] = tr //1170
+			imx[i] = ti //1180
+			throw GoTo1190()
+		} catch (_: GoTo1190) {
+			k = nd2 //1190
+			while (k <= j) { //1220
+				j -= k //1210
+				k /= 2 //1220
+			}
+			j += k //1240
+			continue@nextI //1250
+		}
+	}
+
+	//Loop for each stage
+	for (l in 1..m) { //1270
+		le = (2.0.pow(l)).toInt() //1280
+		le2 = le / 2 //1290
+		ur = 1.0 //1300
+		ui = 0.0 //1310
+
+		//Calculate sine & cosine values
+		sr = cos(pi / le2) //1320
+		si = -sin(pi / le2) //1330
+
+		//Loop for each sub DFT
+		for (j in 1..le2) { //1340
+			jm1 = j - 1 //1350
+
+			//Loop for each butterfly
+			for (i in jm1..nm1 step le) { //1360
+				ip = i + le2 //1370
+
+				//Butterfly calculation
+				tr = rex[ip] * ur - imx[ip] * ui //1380
+				ti = rex[ip] * ui + imx[ip] * ur //1390
+				rex[ip] = rex[i] - tr //1400
+				imx[ip] = imx[i] - ti //1410
+				rex[i] = rex[i] + tr //1420
+				imx[i] = imx[i] + ti //1430
+			}
+			tr = ur //1450
+			ur = tr * sr - ui * si //1460
+			ui = tr * si + ui * sr //1470
+		}
+	}
+}
+
+/**
+ * 1000 'THE FAST FOURIER TRANSFORM
+ * 1010 'Upon entry, N% contains the number of points in the DFT, REX[ ] and
+ * 1020 'IMX[ ] contain the real and imaginary parts of the input. Upon return,
+ * 1030 'REX[ ] and IMX[ ] contain the DFT output. All signals run from 0 to N%-1.
+ * 1040 '
+ * 1050 PI = 3.14159265 'Set constants
+ * 1060 NM1% = N%-1
+ * 1070 ND2% = N%/2
+ * 1080 M% = CINT(LOG(N%)/LOG(2))
+ * 1090 J% = ND2%
+ * 1100 '
+ * 1110 FOR I% = 1 TO N%-2 'Bit reversal sorting
+ * 1120 IF I% >= J% THEN GOTO 1190
+ * 1130 TR = REX[J%]
+ * 1140 TI = IMX[J%]
+ * 1150 REX[J%] = REX[I%]
+ * 1160 IMX[J%] = IMX[I%]
+ * 1170 REX[I%] = TR
+ * 1180 IMX[I%] = TI
+ * 1190 K% = ND2%
+ * 1200 IF K% > J% THEN GOTO 1240
+ * 1210 J% = J%-K%
+ * 1220 K% = K%/2
+ * 1230 GOTO 1200
+ * 1240 J% = J%+K%
+ * 1250 NEXT I%
+ * 1260 '
+ * 1270 FOR L% = 1 TO M% 'Loop for each stage
+ * 1280 LE% = CINT(2^L%)
+ * 1290 LE2% = LE%/2
+ * 1300 UR = 1
+ * 1310 UI = 0
+ * 1320 SR = COS(PI/LE2%) 'Calculate sine & cosine values
+ * 1330 SI = -SIN(PI/LE2%)
+ * 1340 FOR J% = 1 TO LE2% 'Loop for each sub DFT
+ * 1350 JM1% = J%-1
+ * 1360 FOR I% = JM1% TO NM1% STEP LE% 'Loop for each butterfly
+ * 1370 IP% = I%+LE2%
+ * 1380 TR = REX[IP%]*UR - IMX[IP%]*UI 'Butterfly calculation
+ * 1390 TI = REX[IP%]*UI + IMX[IP%]*UR
+ * 1400 REX[IP%] = REX[I%]-TR
+ * 1410 IMX[IP%] = IMX[I%]-TI
+ * 1420 REX[I%] = REX[I%]+TR
+ * 1430 IMX[I%] = IMX[I%]+TI
+ * 1440 NEXT I%
+ * 1450 TR = UR
+ * 1460 UR = TR*SR - UI*SI
+ * 1470 UI = TR*SI + UI*SR
+ * 1480 NEXT J%
+ * 1490 NEXT L%
+ * 1500 '
+ * 1510 RETURN
+ */

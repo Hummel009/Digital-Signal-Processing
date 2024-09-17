@@ -36,7 +36,7 @@ fun main() {
 	var triangleWave = generateTriangleWave()
 	var sawtoothWave = generateSawtoothWave()
 	var noise = generateNoise()
-	var polyphonicSignal = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
+	var polyphonic = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
 
 	var sineModulator = generateSineModulator()
 	var pulseModulator = generatePulseModulator()
@@ -53,7 +53,7 @@ fun main() {
 	saveWav(soundsDir, "triangle_wave.wav", triangleWave)
 	saveWav(soundsDir, "sawtooth_wave.wav", sawtoothWave)
 	saveWav(soundsDir, "noise.wav", noise)
-	saveWav(soundsDir, "polyphonic.wav", polyphonicSignal)
+	saveWav(soundsDir, "polyphonic.wav", polyphonic)
 
 	saveWav(soundsModWaveDir, "sine_mod_wave.wav", modulatedSineWave)
 	saveWav(soundsModWaveDir, "pulse_mod_wave.wav", modulatedPulseWave)
@@ -68,14 +68,14 @@ fun main() {
 	triangleWave = generateTriangleWave()
 	sawtoothWave = generateSawtoothWave()
 	noise = generateNoise()
-	polyphonicSignal = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
+	polyphonic = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
 
 	sineModulator = generateSineModulator()
 	pulseModulator = generatePulseModulator()
 	triangleModulator = generateTriangleModulator()
 	sawtoothModulator = generateSawtoothModulator()
 
-	println("Enter mode: amplitude or frequency")
+	println("Which mode: «amplitude» or «frequency»")
 
 	val input = readln()
 
