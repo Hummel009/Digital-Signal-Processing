@@ -5,28 +5,29 @@ import kotlin.math.sin
 
 fun generateSineWave(): FloatArray {
 	return FloatArray(samples) { n ->
-		amplitude * sin(2 * PI * frequency * n / sampleRate + phase)
+		val value = 2 * PI * frequency + phase * n / sampleRate
+		amplitude * sin(value)
 	}
 }
 
 fun generatePulseWave(): FloatArray {
 	return FloatArray(samples) { n ->
-		val modValue = (2 * PI * frequency * n / sampleRate + phase) % (2 * PI)
-		if (modValue / (2 * PI) <= dutyCycle) amplitude else -amplitude
+		val value = 2 * PI * frequency * n / sampleRate + phase
+		if (value % (2 * PI) / (2 * PI) <= dutyCycle) amplitude else -amplitude
 	}
 }
 
 fun generateTriangleWave(): FloatArray {
 	return FloatArray(samples) { n ->
-		val modValue = (2 * PI * frequency * n / sampleRate + phase + 3 * PI / 2) % (2 * PI)
-		(2 * amplitude / PI) * (abs(modValue - PI) - (PI / 2))
+		val value = 2 * PI * frequency * n / sampleRate + phase
+		(2 * amplitude / PI) * (abs((value + 3 * PI / 2) % (2 * PI) - PI) - (PI / 2))
 	}
 }
 
 fun generateSawtoothWave(): FloatArray {
 	return FloatArray(samples) { n ->
-		val modValue = (2 * PI * frequency * n / sampleRate + phase + PI) % (2 * PI)
-		(amplitude / PI) * (modValue - PI)
+		val value = 2 * PI * frequency * n / sampleRate + phase
+		(amplitude / PI) * ((value + PI) % (2 * PI) - PI)
 	}
 }
 

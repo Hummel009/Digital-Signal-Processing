@@ -59,7 +59,7 @@ fun main() {
 		modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
 	} else {
 		modulatedSineWave = modulateFrequencySineWave(sawtoothModulator)
-		modulatedPulseWave = modulateFrequencyPulseWave()
+		modulatedPulseWave = modulateFrequencyPulseWave(sawtoothModulator)
 		modulatedTriangleWave = modulateFrequencyTriangleWave(sawtoothModulator)
 		modulatedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
 	}
@@ -98,7 +98,7 @@ fun main() {
 		modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
 	} else {
 		modulatedSineWave = modulateFrequencySineWave(sawtoothModulator)
-		modulatedPulseWave = modulateFrequencyPulseWave()
+		modulatedPulseWave = modulateFrequencyPulseWave(sawtoothModulator)
 		modulatedTriangleWave = modulateFrequencyTriangleWave(sawtoothModulator)
 		modulatedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
 	}
