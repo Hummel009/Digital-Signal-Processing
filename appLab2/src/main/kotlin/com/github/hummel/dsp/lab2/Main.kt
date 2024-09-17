@@ -6,21 +6,21 @@ import org.knowm.xchart.XYChart
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.*
-import kotlin.math.sin
 
 //https://www.desmos.com/calculator/vmgatudfmf?lang=ru
 
 const val PI: Float = 3.141592653589793f
 
-const val sampleRate: Float = 22050.0f //N
+const val duration: Float = 5.0f //sec
+
 const val phase: Float = 0.0f //ф
 const val dutyCycle: Float = 0.5f //d
-const val duration: Float = 2.0f //sec
 
 var amplitude: Float = 0.5f //A
-var frequency: Float = 880.0f //f
+var frequency: Float = 1.0f //f
 
-const val samples: Int = (sampleRate * duration).toInt()
+val sampleRate: Float = frequency * 100.0f //N
+val samples: Int = (sampleRate * duration).toInt()
 
 fun main() {
 	val soundsDir = mdIfNot("output/sounds_wave")
@@ -40,41 +40,31 @@ fun main() {
 	saveWav(soundsDir, "noise.wav", noise)
 	saveWav(soundsDir, "polyphonic.wav", polyphonic)
 
-	val frequency = 440.0f
-	val signal = FloatArray(100) {
-		amplitude * sin(2 * PI * frequency * it / sampleRate)
-	}
+	val signal = sineWave
+
 	saveWav(soundsDir, "signal_orig.wav", signal)
-	savePlot(graphsDir, "signal_orig.png", signal, "Signal Orig")
+	savePlot(graphsDir, "signal_orig.png", signal, "Orig Signal")
 
 	var transformed = discreteFourierTransform(signal)
 	var reconstructedSignal = inverseDiscreteFourierTransform(transformed)
 
 	saveWav(soundsDir, "signal_reconstr_disc.wav", reconstructedSignal)
-	savePlot(graphsDir, "signal_reconstr_disc.png", pulseWave, "Signal Reconstr")
+	savePlot(graphsDir, "signal_reconstr_disc.png", pulseWave, "Reconstructed Signal")
 
 	println("BFT ORIG " + signal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 	println("BFT RECO " + reconstructedSignal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 
 	println("Which mode: «fortran» or «library»?")
-	val fortan = readln()
+	val input = readln()
 
-	transformed = fastFourierTransform(signal, fortan == "fortran")
-	reconstructedSignal = inverseFastFourierTransform(transformed, fortan == "fortran")
+	transformed = fastFourierTransform(signal, input == "fortran")
+	reconstructedSignal = inverseFastFourierTransform(transformed, input == "fortran")
 
 	saveWav(soundsDir, "signal_reconstr_fast.wav", reconstructedSignal)
 	savePlot(graphsDir, "signal_reconstr_fast.png", reconstructedSignal, "Reconstructed Signal")
 
 	println("FFT ORIG " + signal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 	println("FFT RECO " + reconstructedSignal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
-
-	var amplitudeSpec = amplitudeSpectrum(transformed)
-	var phaseSpec = phaseSpectrum(transformed)
-
-	println()
-
-	println("AMPL SPECTRE " + amplitudeSpec.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
-	println("PHASE SPECTRE " + phaseSpec.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
@@ -91,9 +81,8 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename))
 }
 
-private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 1) {
-	val sampleRate = 100
-	val xData = (0 until signal.size step skip).map { it.toDouble() / sampleRate }
+private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = frequency.toInt()) {
+	val xData = (0 until samples step skip).map { it.toDouble() / sampleRate }
 	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
 
 	val chart = XYChart(1600, 900)
@@ -101,12 +90,6 @@ private fun savePlot(dir: File, filename: String, signal: FloatArray, title: Str
 	chart.xAxisTitle = "Time (s)"
 	chart.yAxisTitle = "Amplitude"
 	chart.addSeries(title, xData.toDoubleArray(), yData.toDoubleArray())
-
-	// Ensure the directory exists before saving the plot
-	if (!dir.exists()) {
-		dir.mkdirs()
-	}
-
 	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.PNG)
 }
 
