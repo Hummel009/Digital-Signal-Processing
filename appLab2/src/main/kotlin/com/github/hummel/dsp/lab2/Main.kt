@@ -6,7 +6,6 @@ import org.knowm.xchart.XYChart
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.*
-import kotlin.math.abs
 import kotlin.math.sin
 
 //https://www.desmos.com/calculator/vmgatudfmf?lang=ru
@@ -57,9 +56,6 @@ fun main() {
 	println("BFT ORIG " + signal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 	println("BFT RECO " + reconstructedSignal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 
-	var error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-	println("Average BFT Reconstruction Error: ${String.format("%.2f", error)}")
-
 	println("Which mode: «fortran» or «library»?")
 	val fortan = readln()
 
@@ -71,9 +67,6 @@ fun main() {
 
 	println("FFT ORIG " + signal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 	println("FFT RECO " + reconstructedSignal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
-
-	error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-	println("Average Reconstruction Error: ${String.format("%.2f", error)}")
 
 	var amplitudeSpec = amplitudeSpectrum(transformed)
 	var phaseSpec = phaseSpectrum(transformed)

@@ -19,8 +19,8 @@ fun discreteFourierTransform(signal: FloatArray): FloatArray {
 		var imag = 0.0f
 		for (t in 0 until n) {
 			val angle = 2 * PI * t * k / n
-			real += signal[2 * t] * cos(angle) + signal[2 * t + 1] * sin(angle)  // Знак перед sin
-			imag += -signal[2 * t] * sin(angle) + signal[2 * t + 1] * cos(angle) // Знак перед sin
+			real += signal[2 * t] * cos(angle) + signal[2 * t + 1] * sin(angle)
+			imag += -signal[2 * t] * sin(angle) + signal[2 * t + 1] * cos(angle)
 		}
 		output[2 * k] = real
 		output[2 * k + 1] = imag
@@ -83,6 +83,13 @@ fun inverseFastFourierTransform(complexSignal: FloatArray, fortran: Boolean): Fl
 		FastFouriers.BEST.transform(real, imag)
 	}
 
+	if (fortran) {
+		return FloatArray(n).apply {
+			for (i in indices) {
+				this[i] = (real[i] / n).toFloat()
+			}
+		}
+	}
 	return FloatArray(n).apply {
 		for (i in indices) {
 			this[i] = (real[i] / n).toFloat()
@@ -154,6 +161,9 @@ private fun fortranFourierTransform(n: Int, rex: DoubleArray, imx: DoubleArray) 
 			while (k <= j) { //1220
 				j -= k //1210
 				k /= 2 //1220
+				if (k == 0) {
+					return
+				}
 			}
 			j += k //1240
 			continue@nextI //1250
