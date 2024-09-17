@@ -53,7 +53,7 @@ fun main() {
 	savePlot(graphsDir, "signal_reconstr_disc.png", reconstructedSignal, "Signal DFT")
 
 	var error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-	println("Average BFT Reconstruction Error: $error")
+	println("Average BFT Reconstruction Error: ${String.format("%.8f", error)}")
 
 	println("Which mode: «fortran» or «library»?")
 	val input = readln()
@@ -65,7 +65,7 @@ fun main() {
 	savePlot(graphsDir, "signal_reconstr_fast.png", reconstructedSignal, "Signal FFT")
 
 	error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-	println("Average FFT Reconstruction Error: $error")
+	println("Average FFT Reconstruction Error: ${String.format("%.8f", error)}")
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
