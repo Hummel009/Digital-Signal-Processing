@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.*
 import kotlin.math.abs
+import kotlin.math.sin
 
 //https://www.desmos.com/calculator/vmgatudfmf?lang=ru
 
@@ -40,18 +41,18 @@ fun main() {
 	saveWav(soundsDir, "noise.wav", noise)
 	saveWav(soundsDir, "polyphonic.wav", polyphonic)
 
+	val frequency = 440.0f
 	val signal = FloatArray(100) {
-		Math.random().toFloat()
+		amplitude * sin(2 * PI * frequency * it / sampleRate)
 	}
-
 	saveWav(soundsDir, "signal_orig.wav", signal)
-	savePlot(graphsDir, "signal_orig.png", sineWave, "Signal Orig")
+	savePlot(graphsDir, "signal_orig.png", signal, "Signal Orig")
 
 	var transformed = discreteFourierTransform(signal)
 	var reconstructedSignal = inverseDiscreteFourierTransform(transformed)
 
-	saveWav(soundsDir, "signal_reconstr.wav", reconstructedSignal)
-	savePlot(graphsDir, "signal_reconstr.png", pulseWave, "Signal Reconstr")
+	saveWav(soundsDir, "signal_reconstr_disc.wav", reconstructedSignal)
+	savePlot(graphsDir, "signal_reconstr_disc.png", pulseWave, "Signal Reconstr")
 
 	println("BFT ORIG " + signal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 	println("BFT RECO " + reconstructedSignal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
@@ -65,8 +66,8 @@ fun main() {
 	transformed = fastFourierTransform(signal, fortan == "fortran")
 	reconstructedSignal = inverseFastFourierTransform(transformed, fortan == "fortran")
 
-	saveWav(soundsDir, "signal_reconstr.wav", reconstructedSignal)
-	savePlot(graphsDir, "signal_reconstr.png", reconstructedSignal, "Reconstructed Signal")
+	saveWav(soundsDir, "signal_reconstr_fast.wav", reconstructedSignal)
+	savePlot(graphsDir, "signal_reconstr_fast.png", reconstructedSignal, "Reconstructed Signal")
 
 	println("FFT ORIG " + signal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
 	println("FFT RECO " + reconstructedSignal.take(10).joinToString(separator = "; ") { String.format("%.2f", it) })
@@ -97,8 +98,8 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename))
 }
 
-private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
-	val sampleRate = 100 // Define a sample rate if not defined elsewhere
+private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 1) {
+	val sampleRate = 100
 	val xData = (0 until signal.size step skip).map { it.toDouble() / sampleRate }
 	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
 

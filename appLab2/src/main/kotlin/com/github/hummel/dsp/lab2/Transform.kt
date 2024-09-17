@@ -19,8 +19,8 @@ fun discreteFourierTransform(signal: FloatArray): FloatArray {
 		var imag = 0.0f
 		for (t in 0 until n) {
 			val angle = 2 * PI * t * k / n
-			real += signal[2 * t] * cos(angle) - signal[2 * t + 1] * sin(angle)
-			imag += signal[2 * t] * sin(angle) + signal[2 * t + 1] * cos(angle)
+			real += signal[2 * t] * cos(angle) + signal[2 * t + 1] * sin(angle)  // Знак перед sin
+			imag += -signal[2 * t] * sin(angle) + signal[2 * t + 1] * cos(angle) // Знак перед sin
 		}
 		output[2 * k] = real
 		output[2 * k + 1] = imag
@@ -38,8 +38,8 @@ fun inverseDiscreteFourierTransform(signal: FloatArray): FloatArray {
 		var imag = 0.0f
 		for (k in 0 until n) {
 			val angle = 2 * PI * t * k / n
-			real += signal[2 * k] * cos(angle) - signal[2 * k + 1] * sin(angle)
-			imag += signal[2 * k] * sin(angle) + signal[2 * k + 1] * cos(angle)
+			real += signal[2 * k] * cos(angle) + signal[2 * k + 1] * sin(angle)  // Знак перед sin
+			imag += -signal[2 * k] * sin(angle) + signal[2 * k + 1] * cos(angle) // Знак перед sin
 		}
 		output[2 * t] = real / n
 		output[2 * t + 1] = imag / n
@@ -87,7 +87,7 @@ fun inverseFastFourierTransform(complexSignal: FloatArray, fortran: Boolean): Fl
 		for (i in indices) {
 			this[i] = (real[i] / n).toFloat()
 		}
-	}
+	}.map { -it }.toFloatArray()
 }
 
 fun amplitudeSpectrum(complexSignal: FloatArray): FloatArray {
