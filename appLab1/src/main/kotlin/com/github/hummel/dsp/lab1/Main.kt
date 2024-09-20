@@ -28,9 +28,7 @@ const val samples: Int = (sampleRate * duration).toInt()
 fun main() {
 	val origSoundsDir = mdIfNot("output/orig_sounds")
 	val origGraphsDir = mdIfNot("output/orig_graphs")
-	val modsDir = mdIfNot("output/mods")
 	val moddedSoundsDir = mdIfNot("output/modded_sounds")
-	val moddedGraphsDir = mdIfNot("output/modded_graphs")
 	val cautionDir = mdIfNot("output/caution")
 
 	println("Which mode: «amplitude» or «frequency»")
@@ -84,16 +82,6 @@ fun main() {
 	savePlot(origGraphsDir, "sawtooth", sawtoothWave, "Sawtooth")
 	savePlot(origGraphsDir, "noise", noise, "Noise")
 	savePlot(origGraphsDir, "polyphonic", noise, "Polyphonic")
-
-	savePlot(modsDir, "sine", sineModulator, "Sine")
-	savePlot(modsDir, "pulse", pulseModulator, "Pulse")
-	savePlot(modsDir, "triangle", triangleModulator, "Triangle")
-	savePlot(modsDir, "sawtooth", sawtoothModulator, "Sawtooth")
-
-	savePlot(moddedGraphsDir, "sine", moddedSineWave, "Sine")
-	savePlot(moddedGraphsDir, "pulse", moddedPulseWave, "Pulse")
-	savePlot(moddedGraphsDir, "triangle", moddedTriangleWave, "Triangle")
-	savePlot(moddedGraphsDir, "sawtooth", moddedSawtoothWave, "Sawtooth")
 
 	val cautionModulator1 = generatePulseModulator()
 	val cautionModulator2 = generateTriangleModulator(modFrequency = modulatorFrequency * 3.0f)
