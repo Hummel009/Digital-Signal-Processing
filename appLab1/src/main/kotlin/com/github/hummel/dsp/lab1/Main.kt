@@ -124,9 +124,9 @@ fun main() {
 	var sirenaModulator2 = generateTriangleModulator(modFrequency = modulatorFrequency * 3.0f)
 	var sirenaModulator3 = generateSawtoothModulator(modFrequency = modulatorFrequency * 1.5f)
 
-	var modulatedWave0 = modulateFrequencySineWave(amplitude, frequency, sirenaModulator2)
-	var modulatedWave1 = modulateFrequencySineWave(amplitude, frequency, sirenaModulator1)
-	var modulatedWave2 = modulateFrequencySineWave(amplitude, frequency, sirenaModulator3)
+	var modulatedWave0 = modulateFrequencySineWave(sirenaModulator2)
+	var modulatedWave1 = modulateFrequencySineWave(sirenaModulator1)
+	var modulatedWave2 = modulateFrequencySineWave(sirenaModulator3)
 
 	saveWav(soundsModWaveDir, "sir.wav", modulatedWave0 + modulatedWave1 + modulatedWave2)
 }
