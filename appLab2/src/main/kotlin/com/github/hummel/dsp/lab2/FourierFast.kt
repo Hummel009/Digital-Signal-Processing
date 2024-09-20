@@ -7,7 +7,7 @@ import kotlin.math.sin
 fun fft(signal: FloatArray): Array<Complex> {
 	val n = signal.size
 	val real = FloatArray(n) { signal[it] }
-	val imag = FloatArray(n) { 0f }
+	val imag = FloatArray(n) { 0.0f }
 
 	fft(real, imag)
 
@@ -18,12 +18,11 @@ fun fft(signal: FloatArray): Array<Complex> {
 
 fun ifft(complexSignal: Array<Complex>): FloatArray {
 	val n = complexSignal.size
-	val real = FloatArray(n) { 0f }
-	val imag = FloatArray(n) { 0f }
-
-	for (i in 0 until n) {
-		real[i] = complexSignal[i].real
-		imag[i] = complexSignal[i].imaginary
+	val real = FloatArray(n) { i ->
+		complexSignal[i].real
+	}
+	val imag = FloatArray(n) { i ->
+		complexSignal[i].imaginary
 	}
 
 	ifft(real, imag)
