@@ -102,14 +102,17 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 }
 
 private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 1) {
-	val xData = (0 until samples step skip).map { it.toDouble() / sampleRate }
-	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
+	val frequencyData = (0 until signal.size).map { it * (sampleRate / signal.size) }
 
 	val chart = XYChart(1600, 900)
 	chart.title = title
-	chart.xAxisTitle = "Time (s)"
+	chart.xAxisTitle = "Frequency (Hz)"
 	chart.yAxisTitle = "Amplitude"
-	chart.addSeries(title, xData.toDoubleArray(), yData.toDoubleArray())
+	chart.addSeries(
+		title,
+		frequencyData.map { it.toDouble() }.toDoubleArray(),
+		signal.map { it.toDouble() }.toDoubleArray()
+	)
 	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.PNG)
 }
 
