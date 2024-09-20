@@ -7,7 +7,7 @@ fun lowPassFilter(spectrum: FloatArray, cutoffFrequency: Float): FloatArray {
 	val result = FloatArray(n)
 
 	for (i in 0 until n) {
-		val f = (i * sampleRate) / n
+		val f = (i * defaultFrequency) / n
 		result[i] = if (f > cutoffFrequency) 0.0f else spectrum[i]
 	}
 
@@ -21,7 +21,7 @@ fun highPassFilter(spectrum: FloatArray, cutoffFrequency: Float): FloatArray {
 	val result = FloatArray(n)
 
 	for (i in 0 until n) {
-		val f = (i * sampleRate) / n
+		val f = (i * defaultFrequency) / n
 		result[i] = if (f < cutoffFrequency) 0.0f else spectrum[i]
 	}
 
@@ -37,7 +37,7 @@ fun bandPassFilter(
 	val result = FloatArray(n)
 
 	for (i in 0 until n) {
-		val f = (i * sampleRate) / n
+		val f = (i * defaultFrequency) / n
 		result[i] = if (f < cutoffFrequencyL || f > cutoffFrequencyH) 0.0f else spectrum[i]
 	}
 

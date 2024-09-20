@@ -14,77 +14,79 @@ const val PI: Float = 3.141592653589793f
 
 const val duration: Float = 5.0f //sec
 
-const val phase: Float = 0.0f //ф
+const val sampleRate: Float = 44100.0f //N
 const val dutyCycle: Float = 0.5f //d
+const val phase: Float = 0.0f //ф
 
-var amplitude: Float = 0.5f //A
-var frequency: Float = 1.0f //f
+var defaultAmplitude: Float = 0.5f //A
+var defaultFrequency: Float = 880.0f //f
 
-val sampleRate: Float = frequency * 100.0f //N
-val samples: Int = (sampleRate * duration).toInt()
+const val samples: Int = (sampleRate * duration).toInt()
 
 fun main() {
-	val soundsDir = mdIfNot("output/sounds_wave")
-	val graphsDir = mdIfNot("output/graphs_wave")
+	val soundsDir = mdIfNot("output/sounds")
+	val graphsDir = mdIfNot("output/graphs")
+	val spectrumDir = mdIfNot("output/spectrum")
+	val filterDir = mdIfNot("output/filter")
 
-	var sineWave = generateSineWave()
-	var pulseWave = generatePulseWave()
-	var triangleWave = generateTriangleWave()
-	var sawtoothWave = generateSawtoothWave()
-	var noise = generateNoise()
-	var polyphonic = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
+	var signal = generatePulseWave()
 
-	saveWav(soundsDir, "sine_wave.wav", sineWave)
-	saveWav(soundsDir, "pulse_wave.wav", pulseWave)
-	saveWav(soundsDir, "triangle_wave.wav", triangleWave)
-	saveWav(soundsDir, "sawtooth_wave.wav", sawtoothWave)
-	saveWav(soundsDir, "noise.wav", noise)
-	saveWav(soundsDir, "polyphonic.wav", polyphonic)
+	val originalSize = signal.size
+	val nearestPowerOfTwo = 1 shl (32 - Integer.numberOfLeadingZeros(originalSize - 1))
+	val paddedSignal = FloatArray(nearestPowerOfTwo)
+	signal.copyInto(paddedSignal)
 
-	var signal = sineWave
+	saveWav(soundsDir, "orig", paddedSignal)
+	saveTimePlot(graphsDir, "orig", paddedSignal, "ORIG")
 
-	saveWav(soundsDir, "signal_orig.wav", signal)
-	savePlot(graphsDir, "signal_orig.png", signal, "Signal ORG")
-
-	var transformed = discreteFourierTransform(signal)
-	var reconstructedSignal = inverseDiscreteFourierTransform(transformed)
-
-	saveWav(soundsDir, "signal_reconstr_disc.wav", reconstructedSignal)
-	savePlot(graphsDir, "signal_reconstr_disc.png", reconstructedSignal, "Signal DFT")
-
-	var error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-	println("Average BFT Reconstruction Error: ${String.format("%.8f", error)}")
-
-	println("Which mode: «fortran» or «library»?")
+	println("Which mode: «dft» or «fft»?")
 	val input = readln()
 
-	transformed = fastFourierTransform(signal, input == "fortran")
-	reconstructedSignal = inverseFastFourierTransform(transformed, input == "fortran")
+	val transformed = if (input.lowercase() == "dft") {
+		require(paddedSignal.size < 1000) { "Too large sample rate for this non-optimized method." }
 
-	saveWav(soundsDir, "signal_reconstr_fast.wav", reconstructedSignal)
-	savePlot(graphsDir, "signal_reconstr_fast.png", reconstructedSignal, "Signal FFT")
+		val deconstructedSignal = dft(paddedSignal)
+		val reconstructedSignal = idft(deconstructedSignal)
 
-	error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-	println("Average FFT Reconstruction Error: ${String.format("%.8f", error)}")
+		saveWav(soundsDir, "reco_dft", reconstructedSignal)
+		saveTimePlot(graphsDir, "reco_dft", reconstructedSignal, "RECO DFT")
 
-	signal = noise
+		val error = paddedSignal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
+		println("Average BFT Reconstruction Error: ${String.format("%.8f", error)}")
 
-	transformed = fastFourierTransform(signal, input == "fortran")
-	reconstructedSignal = inverseFastFourierTransform(transformed, input == "fortran")
+		deconstructedSignal
+	} else {
+		val deconstructedSignal = fft(paddedSignal)
+		val reconstructedSignal = ifft(deconstructedSignal)
+
+		saveWav(soundsDir, "reco_fft", reconstructedSignal)
+		saveTimePlot(graphsDir, "reco_fft", reconstructedSignal, "RECO FFT")
+
+		val error = paddedSignal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
+		println("Average FFT Reconstruction Error: ${String.format("%.8f", error)}")
+
+		deconstructedSignal
+	}
 
 	val amplitudeSpectrum = computeAmplitudeSpectrum(transformed)
 	val phaseSpectrum = computePhaseSpectrum(transformed)
 
-	savePlot(graphsDir, "amplitude_spectrum.png", amplitudeSpectrum, "Amplitude Spectrum")
-	savePlot(graphsDir, "phase_spectrum.png", phaseSpectrum, "Phase Spectrum")
+	saveFrequencyPlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
+	saveFrequencyPlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 
-	val lowPassFiltered = lowPassFilter(amplitudeSpectrum, cutoffFrequency = 50.0f)
-	val highPassFiltered = highPassFilter(amplitudeSpectrum, cutoffFrequency = 50.0f)
-	val bandPassFiltered = bandPassFilter(amplitudeSpectrum, cutoffFrequencyL = 25.0f, cutoffFrequencyH = 75.0f)
+	val lowPassFiltered = lowPassFilter(
+		amplitudeSpectrum, cutoffFrequency = defaultFrequency / 2
+	)
+	val highPassFiltered = highPassFilter(
+		amplitudeSpectrum, cutoffFrequency = defaultFrequency / 2
+	)
+	val bandPassFiltered = bandPassFilter(
+		amplitudeSpectrum, cutoffFrequencyL = defaultFrequency / 4, cutoffFrequencyH = defaultFrequency * 3 / 4
+	)
 
-	savePlot(graphsDir, "signal_low_pass.png", lowPassFiltered, "Low Pass Filtered")
-	savePlot(graphsDir, "signal_high_pass.png", highPassFiltered, "High Pass Filtered")
-	savePlot(graphsDir, "signal_band_pass.png", bandPassFiltered, "Band Pass Filtered")
+	saveFrequencyPlot(filterDir, "low_pass", lowPassFiltered, "Low Pass")
+	saveFrequencyPlot(filterDir, "high_pass", highPassFiltered, "High Pass")
+	saveFrequencyPlot(filterDir, "band_pass", bandPassFiltered, "Band Pass")
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
@@ -98,22 +100,31 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	val audioInputStream = AudioInputStream(
 		ByteArrayInputStream(data), audioFormat, signal.size.toLong()
 	)
-	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename))
+	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename + ".wav"))
 }
 
-private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 1) {
-	val frequencyData = (0 until signal.size).map { it * (sampleRate / signal.size) }
+private fun saveFrequencyPlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
+	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size * defaultFrequency }.toDoubleArray()
+	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }.toDoubleArray()
 
 	val chart = XYChart(1600, 900)
 	chart.title = title
 	chart.xAxisTitle = "Frequency (Hz)"
 	chart.yAxisTitle = "Amplitude"
-	chart.addSeries(
-		title,
-		frequencyData.map { it.toDouble() }.toDoubleArray(),
-		signal.map { it.toDouble() }.toDoubleArray()
-	)
-	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.PNG)
+	chart.addSeries(title, xData, yData)
+	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
+}
+
+private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
+	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size * duration }.toDoubleArray()
+	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }.toDoubleArray()
+
+	val chart = XYChart(1600, 900)
+	chart.title = title
+	chart.xAxisTitle = "Time (s)"
+	chart.yAxisTitle = "Amplitude"
+	chart.addSeries(title, xData, yData)
+	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
 }
 
 private fun mdIfNot(path: String): File {

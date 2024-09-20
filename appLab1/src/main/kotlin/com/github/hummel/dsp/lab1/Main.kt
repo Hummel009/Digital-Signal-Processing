@@ -76,12 +76,12 @@ fun main() {
 	saveWav(moddedSoundsDir, "triangle", moddedTriangleWave)
 	saveWav(moddedSoundsDir, "sawtooth", moddedSawtoothWave)
 
-	savePlot(origGraphsDir, "sine", sineWave, "Sine")
-	savePlot(origGraphsDir, "pulse", pulseWave, "Pulse")
-	savePlot(origGraphsDir, "triangle", triangleWave, "Triangle")
-	savePlot(origGraphsDir, "sawtooth", sawtoothWave, "Sawtooth")
-	savePlot(origGraphsDir, "noise", noise, "Noise")
-	savePlot(origGraphsDir, "polyphonic", noise, "Polyphonic")
+	saveTimePlot(origGraphsDir, "sine", sineWave, "Sine")
+	saveTimePlot(origGraphsDir, "pulse", pulseWave, "Pulse")
+	saveTimePlot(origGraphsDir, "triangle", triangleWave, "Triangle")
+	saveTimePlot(origGraphsDir, "sawtooth", sawtoothWave, "Sawtooth")
+	saveTimePlot(origGraphsDir, "noise", noise, "Noise")
+	saveTimePlot(origGraphsDir, "polyphonic", noise, "Polyphonic")
 
 	val cautionModulator1 = generatePulseModulator()
 	val cautionModulator2 = generateTriangleModulator(modFrequency = modulatorFrequency * 3.0f)
@@ -92,7 +92,7 @@ fun main() {
 	var moddedWave2 = modulateFrequencySineWave(modulator = cautionModulator3)
 
 	saveWav(cautionDir, "caution", moddedWave0 + moddedWave1 + moddedWave2)
-	savePlot(cautionDir, "caution", moddedWave0 + moddedWave1 + moddedWave2, "Caution")
+	saveTimePlot(cautionDir, "caution", moddedWave0 + moddedWave1 + moddedWave2, "Caution")
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
@@ -109,8 +109,8 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename + ".wav"))
 }
 
-private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
-	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size }.toDoubleArray()
+private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
+	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size * duration }.toDoubleArray()
 	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }.toDoubleArray()
 
 	val chart = XYChart(1600, 900)
