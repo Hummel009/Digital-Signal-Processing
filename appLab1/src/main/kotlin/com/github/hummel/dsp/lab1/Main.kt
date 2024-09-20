@@ -119,6 +119,16 @@ fun main() {
 	savePlot(graphsModWaveDir, "pulse_mod_wave.png", modulatedPulseWave, "Pulse Mod Wave")
 	savePlot(graphsModWaveDir, "triangle_mod_wave.png", modulatedTriangleWave, "Triangle Mod Wave")
 	savePlot(graphsModWaveDir, "sawtooth_mod_wave.png", modulatedSawtoothWave, "Sawtooth Mod Wave")
+
+	var sirenaModulator1 = generatePulseModulator()
+	var sirenaModulator2 = generateTriangleModulator(modFrequency = modulatorFrequency * 3.0f)
+	var sirenaModulator3 = generateSawtoothModulator(modFrequency = modulatorFrequency * 1.5f)
+
+	var modulatedWave0 = modulateFrequencySineWave(amplitude, frequency, sirenaModulator2)
+	var modulatedWave1 = modulateFrequencySineWave(amplitude, frequency, sirenaModulator1)
+	var modulatedWave2 = modulateFrequencySineWave(amplitude, frequency, sirenaModulator3)
+
+	saveWav(soundsModWaveDir, "sir.wav", modulatedWave0 + modulatedWave1 + modulatedWave2)
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {

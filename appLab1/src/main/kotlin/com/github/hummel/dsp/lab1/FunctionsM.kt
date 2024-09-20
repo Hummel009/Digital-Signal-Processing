@@ -3,30 +3,38 @@ package com.github.hummel.dsp.lab1
 import kotlin.math.abs
 import kotlin.math.sin
 
-fun generateSineModulator(): FloatArray {
+fun generateSineModulator(
+	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
+): FloatArray {
 	return FloatArray(samples) { n ->
-		val value = 2 * PI * modulatorFrequency + phase * n / sampleRate
-		modulatorAmplitude * sin(value)
+		val value = 2 * PI * modFrequency + phase * n / sampleRate
+		modAmplitude * sin(value)
 	}
 }
 
-fun generatePulseModulator(): FloatArray {
+fun generatePulseModulator(
+	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
+): FloatArray {
 	return FloatArray(samples) { n ->
-		val value = 2 * PI * modulatorFrequency * n / sampleRate + phase
-		if (value % (2 * PI) / (2 * PI) <= dutyCycle) modulatorAmplitude else -modulatorAmplitude
+		val value = 2 * PI * modFrequency * n / sampleRate + phase
+		if (value % (2 * PI) / (2 * PI) <= dutyCycle) modAmplitude else -modAmplitude
 	}
 }
 
-fun generateTriangleModulator(): FloatArray {
+fun generateTriangleModulator(
+	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
+): FloatArray {
 	return FloatArray(samples) { n ->
-		val value = 2 * PI * modulatorFrequency * n / sampleRate + phase
-		(2 * modulatorAmplitude / PI) * (abs((value + 3 * PI / 2) % (2 * PI) - PI) - (PI / 2))
+		val value = 2 * PI * modFrequency * n / sampleRate + phase
+		(2 * modAmplitude / PI) * (abs((value + 3 * PI / 2) % (2 * PI) - PI) - (PI / 2))
 	}
 }
 
-fun generateSawtoothModulator(): FloatArray {
+fun generateSawtoothModulator(
+	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
+): FloatArray {
 	return FloatArray(samples) { n ->
-		val value = 2 * PI * modulatorFrequency * n / sampleRate + phase
-		(modulatorAmplitude / PI) * ((value + PI) % (2 * PI) - PI)
+		val value = 2 * PI * modFrequency * n / sampleRate + phase
+		(modAmplitude / PI) * ((value + PI) % (2 * PI) - PI)
 	}
 }
