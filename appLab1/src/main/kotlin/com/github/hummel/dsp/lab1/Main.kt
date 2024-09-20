@@ -122,15 +122,15 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 }
 
 private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 200) {
-	val xData = (0 until signal.size step skip).map { it.toDouble() / sampleRate }
-	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
+	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size }.toDoubleArray()
+	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }.toDoubleArray()
 
 	val chart = XYChart(1600, 900)
 	chart.title = title
 	chart.xAxisTitle = "Time (s)"
 	chart.yAxisTitle = "Amplitude"
-	chart.addSeries(title, xData.toDoubleArray(), yData.toDoubleArray())
-	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.PNG)
+	chart.addSeries(title, xData, yData)
+	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
 }
 
 private fun mdIfNot(path: String): File {
