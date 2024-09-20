@@ -60,10 +60,10 @@ fun main() {
 		moddedTriangleWave = modulateAmplitude(triangleWave, triangleModulator)
 		moddedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
 	} else {
-		moddedSineWave = modulateFrequencySineWave(sineModulator)
-		moddedPulseWave = modulateFrequencyPulseWave(pulseModulator)
-		moddedTriangleWave = modulateFrequencyTriangleWave(triangleModulator)
-		moddedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
+		moddedSineWave = modulateFrequencySineWave(modulator = sineModulator)
+		moddedPulseWave = modulateFrequencyPulseWave(modulator = pulseModulator)
+		moddedTriangleWave = modulateFrequencyTriangleWave(modulator = triangleModulator)
+		moddedSawtoothWave = modulateFrequencySawtoothWave(modulator = sawtoothModulator)
 	}
 
 	saveWav(origSoundsDir, "sine", sineWave)
@@ -99,9 +99,9 @@ fun main() {
 	val cautionModulator2 = generateTriangleModulator(modFrequency = modulatorFrequency * 3.0f)
 	val cautionModulator3 = generateSawtoothModulator(modFrequency = modulatorFrequency * 1.5f)
 
-	var moddedWave0 = modulateFrequencySineWave(cautionModulator2)
-	var moddedWave1 = modulateFrequencySineWave(cautionModulator1)
-	var moddedWave2 = modulateFrequencySineWave(cautionModulator3)
+	var moddedWave0 = modulateFrequencySineWave(modulator = cautionModulator2)
+	var moddedWave1 = modulateFrequencySineWave(modulator = cautionModulator1)
+	var moddedWave2 = modulateFrequencySineWave(modulator = cautionModulator3)
 
 	saveWav(cautionDir, "caution", moddedWave0 + moddedWave1 + moddedWave2)
 	savePlot(cautionDir, "caution", moddedWave0 + moddedWave1 + moddedWave2, "Caution")
