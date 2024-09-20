@@ -7,8 +7,8 @@ fun modulateFrequencySineWave(modulator: FloatArray): FloatArray {
 	var value = 0.0f
 
 	return FloatArray(samples) { n ->
-		val res = amplitude * sin(value)
-		value += 2 * PI * frequency * (1 + modulator[n]) / sampleRate + phase
+		val res = defaultAmplitude * sin(value)
+		value += 2 * PI * defaultFrequency * (1 + modulator[n]) / sampleRate + phase
 		res
 	}
 }
@@ -17,8 +17,8 @@ fun modulateFrequencyPulseWave(modulator: FloatArray): FloatArray {
 	var value = 0.0f
 
 	return FloatArray(samples) { n ->
-		val res = if (value % (2 * PI) / (2 * PI) <= dutyCycle) amplitude else -amplitude
-		value += 2 * PI * frequency * (1 + modulator[n]) / sampleRate + phase
+		val res = if (value % (2 * PI) / (2 * PI) <= dutyCycle) defaultAmplitude else -defaultAmplitude
+		value += 2 * PI * defaultFrequency * (1 + modulator[n]) / sampleRate + phase
 		res
 	}
 }
@@ -27,8 +27,8 @@ fun modulateFrequencyTriangleWave(modulator: FloatArray): FloatArray {
 	var value = 0.0f
 
 	return FloatArray(samples) { n ->
-		val res = (2 * amplitude / PI) * (abs((value + 3 * PI / 2) % (2 * PI) - PI) - (PI / 2))
-		value += 2 * PI * frequency * (1 + modulator[n]) / sampleRate + phase
+		val res = (2 * defaultAmplitude / PI) * (abs((value + 3 * PI / 2) % (2 * PI) - PI) - (PI / 2))
+		value += 2 * PI * defaultFrequency * (1 + modulator[n]) / sampleRate + phase
 		res
 	}
 }
@@ -37,8 +37,8 @@ fun modulateFrequencySawtoothWave(modulator: FloatArray): FloatArray {
 	var value = 0.0f
 
 	return FloatArray(samples) { n ->
-		val res = (amplitude / PI) * ((value + PI) % (2 * PI) - PI)
-		value += 2 * PI * frequency * (1 + modulator[n]) / sampleRate + phase
+		val res = (defaultAmplitude / PI) * ((value + PI) % (2 * PI) - PI)
+		value += 2 * PI * defaultFrequency * (1 + modulator[n]) / sampleRate + phase
 		res
 	}
 }

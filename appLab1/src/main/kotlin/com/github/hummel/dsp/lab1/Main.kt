@@ -11,25 +11,27 @@ import javax.sound.sampled.*
 
 const val PI: Float = 3.141592653589793f
 
-const val sampleRate: Float = 44100.0f //N
-const val phase: Float = 0.0f //ф
-const val dutyCycle: Float = 0.5f //d
 const val duration: Float = 5.0f //sec
+
+const val sampleRate: Float = 44100.0f //N
+const val dutyCycle: Float = 0.5f //d
+const val phase: Float = 0.0f //ф
+
+var defaultAmplitude: Float = 0.5f //A
+var defaultFrequency: Float = 880.0f //f
 
 var modulatorAmplitude: Float = 0.25f // A
 var modulatorFrequency: Float = 1.0f // f
 
-var amplitude: Float = 0.5f //A
-var frequency: Float = 880.0f //f
-
 const val samples: Int = (sampleRate * duration).toInt()
 
 fun main() {
-	val soundsDir = mdIfNot("output/1_sounds_wave")
-	val soundsModWaveDir = mdIfNot("output/3_sounds_mod_wave")
-	val graphsDir = mdIfNot("output/1_graphs_wave")
-	val graphsModWaveDir = mdIfNot("output/3_graphs_mod_wave")
-	val graphsModDir = mdIfNot("output/2_graphs_mod")
+	val origSoundsDir = mdIfNot("output/orig_sounds")
+	val origGraphsDir = mdIfNot("output/orig_graphs")
+	val modsDir = mdIfNot("output/mods")
+	val moddedSoundsDir = mdIfNot("output/modded_sounds")
+	val moddedGraphsDir = mdIfNot("output/modded_graphs")
+	val cautionDir = mdIfNot("output/caution")
 
 	println("Which mode: «amplitude» or «frequency»")
 
@@ -47,88 +49,62 @@ fun main() {
 	var triangleModulator = generateTriangleModulator()
 	var sawtoothModulator = generateSawtoothModulator()
 
-	var modulatedSineWave: FloatArray
-	var modulatedPulseWave: FloatArray
-	var modulatedTriangleWave: FloatArray
-	var modulatedSawtoothWave: FloatArray
+	var moddedSineWave: FloatArray
+	var moddedPulseWave: FloatArray
+	var moddedTriangleWave: FloatArray
+	var moddedSawtoothWave: FloatArray
 
 	if (input.lowercase() == "amplitude") {
-		modulatedSineWave = modulateAmplitude(sineWave, sawtoothModulator)
-		modulatedPulseWave = modulateAmplitude(pulseWave, sawtoothModulator)
-		modulatedTriangleWave = modulateAmplitude(triangleWave, sawtoothModulator)
-		modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
+		moddedSineWave = modulateAmplitude(sineWave, sineModulator)
+		moddedPulseWave = modulateAmplitude(pulseWave, pulseModulator)
+		moddedTriangleWave = modulateAmplitude(triangleWave, triangleModulator)
+		moddedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
 	} else {
-		modulatedSineWave = modulateFrequencySineWave(sawtoothModulator)
-		modulatedPulseWave = modulateFrequencyPulseWave(sawtoothModulator)
-		modulatedTriangleWave = modulateFrequencyTriangleWave(sawtoothModulator)
-		modulatedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
+		moddedSineWave = modulateFrequencySineWave(sineModulator)
+		moddedPulseWave = modulateFrequencyPulseWave(pulseModulator)
+		moddedTriangleWave = modulateFrequencyTriangleWave(triangleModulator)
+		moddedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
 	}
 
-	saveWav(soundsDir, "sine_wave.wav", sineWave)
-	saveWav(soundsDir, "pulse_wave.wav", pulseWave)
-	saveWav(soundsDir, "triangle_wave.wav", triangleWave)
-	saveWav(soundsDir, "sawtooth_wave.wav", sawtoothWave)
-	saveWav(soundsDir, "noise.wav", noise)
-	saveWav(soundsDir, "polyphonic.wav", polyphonic)
+	saveWav(origSoundsDir, "sine.wav", sineWave)
+	saveWav(origSoundsDir, "pulse.wav", pulseWave)
+	saveWav(origSoundsDir, "triangle.wav", triangleWave)
+	saveWav(origSoundsDir, "sawtooth.wav", sawtoothWave)
+	saveWav(origSoundsDir, "noise.wav", noise)
+	saveWav(origSoundsDir, "polyphonic.wav", polyphonic)
 
-	saveWav(soundsModWaveDir, "sine_mod_wave.wav", modulatedSineWave)
-	saveWav(soundsModWaveDir, "pulse_mod_wave.wav", modulatedPulseWave)
-	saveWav(soundsModWaveDir, "triangle_mod_wave.wav", modulatedTriangleWave)
-	saveWav(soundsModWaveDir, "sawtooth_mod_wave.wav", modulatedSawtoothWave)
+	saveWav(moddedSoundsDir, "sine.wav", moddedSineWave)
+	saveWav(moddedSoundsDir, "pulse.wav", moddedPulseWave)
+	saveWav(moddedSoundsDir, "triangle.wav", moddedTriangleWave)
+	saveWav(moddedSoundsDir, "sawtooth.wav", moddedSawtoothWave)
 
-	frequency /= 440.0f
-	modulatorFrequency /= 440.0f
+	savePlot(origGraphsDir, "sine.png", sineWave, "Sine")
+	savePlot(origGraphsDir, "pulse.png", pulseWave, "Pulse")
+	savePlot(origGraphsDir, "triangle.png", triangleWave, "Triangle")
+	savePlot(origGraphsDir, "sawtooth.png", sawtoothWave, "Sawtooth")
+	savePlot(origGraphsDir, "noise.png", noise, "Noise")
+	savePlot(origGraphsDir, "polyphonic.png", noise, "Polyphonic")
 
-	sineWave = generateSineWave()
-	pulseWave = generatePulseWave()
-	triangleWave = generateTriangleWave()
-	sawtoothWave = generateSawtoothWave()
-	noise = generateNoise()
-	polyphonic = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
+	savePlot(modsDir, "sine.png", sineModulator, "Sine")
+	savePlot(modsDir, "pulse.png", pulseModulator, "Pulse")
+	savePlot(modsDir, "triangle.png", triangleModulator, "Triangle")
+	savePlot(modsDir, "sawtooth.png", sawtoothModulator, "Sawtooth")
 
-	sineModulator = generateSineModulator()
-	pulseModulator = generatePulseModulator()
-	triangleModulator = generateTriangleModulator()
-	sawtoothModulator = generateSawtoothModulator()
+	savePlot(moddedGraphsDir, "sine.png", moddedSineWave, "Sine")
+	savePlot(moddedGraphsDir, "pulse.png", moddedPulseWave, "Pulse")
+	savePlot(moddedGraphsDir, "triangle.png", moddedTriangleWave, "Triangle")
+	savePlot(moddedGraphsDir, "sawtooth.png", moddedSawtoothWave, "Sawtooth")
 
-	if (input.lowercase() == "amplitude") {
-		modulatedSineWave = modulateAmplitude(sineWave, sawtoothModulator)
-		modulatedPulseWave = modulateAmplitude(pulseWave, sawtoothModulator)
-		modulatedTriangleWave = modulateAmplitude(triangleWave, sawtoothModulator)
-		modulatedSawtoothWave = modulateAmplitude(sawtoothWave, sawtoothModulator)
-	} else {
-		modulatedSineWave = modulateFrequencySineWave(sawtoothModulator)
-		modulatedPulseWave = modulateFrequencyPulseWave(sawtoothModulator)
-		modulatedTriangleWave = modulateFrequencyTriangleWave(sawtoothModulator)
-		modulatedSawtoothWave = modulateFrequencySawtoothWave(sawtoothModulator)
-	}
+	val cautionModulator1 = generatePulseModulator()
+	val cautionModulator2 = generateTriangleModulator(modFrequency = modulatorFrequency * 3.0f)
+	val cautionModulator3 = generateSawtoothModulator(modFrequency = modulatorFrequency * 1.5f)
 
-	savePlot(graphsDir, "sine_wave.png", sineWave, "Sine Wave")
-	savePlot(graphsDir, "pulse_wave.png", pulseWave, "Pulse Wave")
-	savePlot(graphsDir, "triangle_wave.png", triangleWave, "Triangle Wave")
-	savePlot(graphsDir, "sawtooth_wave.png", sawtoothWave, "Sawtooth Wave")
-	savePlot(graphsDir, "noise.png", noise, "Noise")
-	savePlot(graphsDir, "polyphonic.png", noise, "Polyphonic")
+	var moddedWave0 = modulateFrequencySineWave(cautionModulator2)
+	var moddedWave1 = modulateFrequencySineWave(cautionModulator1)
+	var moddedWave2 = modulateFrequencySineWave(cautionModulator3)
 
-	savePlot(graphsModDir, "sine_mod.png", sineModulator, "Sine Mod")
-	savePlot(graphsModDir, "pulse_mod.png", pulseModulator, "Pulse Mod")
-	savePlot(graphsModDir, "triangle_mod.png", triangleModulator, "Triangle Mod")
-	savePlot(graphsModDir, "sawtooth_mod.png", sawtoothModulator, "Sawtooth Mod")
-
-	savePlot(graphsModWaveDir, "sine_mod_wave.png", modulatedSineWave, "Sine Mod Wave")
-	savePlot(graphsModWaveDir, "pulse_mod_wave.png", modulatedPulseWave, "Pulse Mod Wave")
-	savePlot(graphsModWaveDir, "triangle_mod_wave.png", modulatedTriangleWave, "Triangle Mod Wave")
-	savePlot(graphsModWaveDir, "sawtooth_mod_wave.png", modulatedSawtoothWave, "Sawtooth Mod Wave")
-
-	var sirenaModulator1 = generatePulseModulator()
-	var sirenaModulator2 = generateTriangleModulator(modFrequency = modulatorFrequency * 3.0f)
-	var sirenaModulator3 = generateSawtoothModulator(modFrequency = modulatorFrequency * 1.5f)
-
-	var modulatedWave0 = modulateFrequencySineWave(sirenaModulator2)
-	var modulatedWave1 = modulateFrequencySineWave(sirenaModulator1)
-	var modulatedWave2 = modulateFrequencySineWave(sirenaModulator3)
-
-	saveWav(soundsModWaveDir, "sir.wav", modulatedWave0 + modulatedWave1 + modulatedWave2)
+	saveWav(cautionDir, "caution.wav", moddedWave0 + moddedWave1 + moddedWave2)
+	savePlot(cautionDir, "caution.png", moddedWave0 + moddedWave1 + moddedWave2, "Caution")
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
@@ -145,8 +121,8 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename))
 }
 
-private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
-	val xData = (0 until samples step skip).map { it.toDouble() / sampleRate }
+private fun savePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 200) {
+	val xData = (0 until signal.size step skip).map { it.toDouble() / sampleRate }
 	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
 
 	val chart = XYChart(1600, 900)

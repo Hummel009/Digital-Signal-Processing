@@ -7,7 +7,7 @@ fun generateSineModulator(
 	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
 ): FloatArray {
 	return FloatArray(samples) { n ->
-		val value = 2 * PI * modFrequency + phase * n / sampleRate
+		val value = 2 * PI * modFrequency * n / sampleRate + phase
 		modAmplitude * sin(value)
 	}
 }
