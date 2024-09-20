@@ -1,18 +1,13 @@
 package com.github.hummel.dsp.lab2
 
-import kotlin.math.atan2
-import kotlin.math.sqrt
-
-fun amplitudeSpectrum(complexSignal: FloatArray): FloatArray {
-	val n = complexSignal.size / 2
-	return FloatArray(n) { i ->
-		sqrt(complexSignal[2 * i] * complexSignal[2 * i] + complexSignal[2 * i + 1] * complexSignal[2 * i + 1])
+fun computeAmplitudeSpectrum(spectrum: Array<Complex>): FloatArray {
+	return FloatArray(spectrum.size) { k ->
+		2 * spectrum[k].magnitude / spectrum.size
 	}
 }
 
-fun phaseSpectrum(complexSignal: FloatArray): FloatArray {
-	val n = complexSignal.size / 2
-	return FloatArray(n) { i ->
-		atan2(complexSignal[2 * i + 1], complexSignal[2 * i])
+fun computePhaseSpectrum(spectrum: Array<Complex>): FloatArray {
+	return FloatArray(spectrum.size) { k ->
+		spectrum[k].phase
 	}
 }

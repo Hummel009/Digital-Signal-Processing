@@ -43,25 +43,3 @@ fun bandPassFilter(
 
 	return result
 }
-
-fun computeAmplitudeSpectrum(spectrum: Array<Complex>): FloatArray {
-	val n = spectrum.size
-	val amplitudeSpectrum = FloatArray(n)
-
-	for (k in 0 until n) {
-		amplitudeSpectrum[k] = 2 * spectrum[k].magnitude / n
-	}
-
-	return amplitudeSpectrum
-}
-
-fun computePhaseSpectrum(spectrum: Array<Complex>): FloatArray {
-	val n = spectrum.size
-	val phaseSpectrum = FloatArray(n)
-
-	for (k in 0 until n) {
-		phaseSpectrum[k] = spectrum[k].phase
-	}
-
-	return phaseSpectrum
-}
