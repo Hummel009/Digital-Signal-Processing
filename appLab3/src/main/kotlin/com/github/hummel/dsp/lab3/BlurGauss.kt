@@ -21,14 +21,15 @@ fun applyGaussianBlur(imageArray: Array<Array<IntArray>>, boxSize: Int, sigma: F
 						val newX = x + dx
 
 						if (newY in 0 until height && newX in 0 until width) {
-							sum += imageArray[newY][newX][c] * kernel[dy + padSize][dx + padSize]
-							weightSum += kernel[dy + padSize][dx + padSize]
+							val kVal = kernel[dy + padSize][dx + padSize]
+
+							sum += imageArray[newY][newX][c] * kVal
+							weightSum += kVal
 						}
 					}
 				}
 
-				// Normalize color value by total weight
-				blurredImage[y][x][c] = if (weightSum > 0) (sum / weightSum).toInt().coerceIn(0, 255) else 0
+				blurredImage[y][x][c] = (sum / weightSum).toInt().coerceIn(0, 255)
 			}
 		}
 	}
