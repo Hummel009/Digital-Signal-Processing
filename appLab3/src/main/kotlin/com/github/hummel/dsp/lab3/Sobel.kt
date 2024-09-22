@@ -3,7 +3,6 @@ package com.github.hummel.dsp.lab3
 import kotlin.math.sqrt
 
 fun sobelOperator(imageArray: Array<Array<IntArray>>): Array<Array<IntArray>> {
-	// Define Sobel kernels.
 	val sobelX = arrayOf(
 		intArrayOf(-1, 0, 1), intArrayOf(-2, 0, 2), intArrayOf(-1, 0, 1)
 	)

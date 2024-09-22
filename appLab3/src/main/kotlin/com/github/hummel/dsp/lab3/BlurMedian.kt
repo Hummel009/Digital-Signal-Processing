@@ -21,7 +21,7 @@ fun applyMedianBlur(imageArray: Array<Array<IntArray>>, boxSize: Int): Array<Arr
 					}
 				}
 				pixelValues.sort()
-				blurredImage[y][x][c] = pixelValues[pixelValues.size / 2] // Get median value.
+				blurredImage[y][x][c] = pixelValues[pixelValues.size / 2]
 			}
 		}
 	}

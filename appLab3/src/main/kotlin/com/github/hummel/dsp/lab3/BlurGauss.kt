@@ -13,7 +13,7 @@ fun applyGaussianBlur(imageArray: Array<Array<IntArray>>, boxSize: Int, sigma: F
 		for (x in 0 until width) {
 			for (c in 0 until channels) {
 				var sum = 0.0f
-				var weightSum = 0.0f // To normalize the result
+				var weightSum = 0.0f
 
 				for (dy in -padSize until padSize) {
 					for (dx in -padSize until padSize) {
