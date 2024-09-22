@@ -30,7 +30,6 @@ fun gaussianKernel(kernelSize: Int, sigma: Double): Array<DoubleArray> {
 fun applyGaussianBlur(imageArray: Array<Array<IntArray>>, kernelSize: Int, sigma: Double): Array<Array<IntArray>> {
 	val height = imageArray.size
 	val width = imageArray[0].size
-	val channels = imageArray[0][0].size
 	val padSize = kernelSize / 2
 	val kernel = gaussianKernel(kernelSize, sigma)
 

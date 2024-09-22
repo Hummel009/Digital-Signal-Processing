@@ -8,7 +8,7 @@ fun applyBoxBlur(imageArray: Array<Array<IntArray>>, kernelSize: Int): Array<Arr
 
 	for (y in padSize until height - padSize) {
 		for (x in padSize until width - padSize) {
-			for (c in 0..2) {
+			for (c in 0 until channels) {
 				var sum = 0.0
 				for (dy in -padSize..padSize) {
 					for (dx in -padSize..padSize) {

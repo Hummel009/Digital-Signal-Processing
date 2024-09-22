@@ -8,7 +8,7 @@ fun applyMedianBlur(imageArray: Array<Array<IntArray>>, kernelSize: Int): Array<
 
 	for (y in padSize until height - padSize) {
 		for (x in padSize until width - padSize) {
-			for (c in 0..2) {
+			for (c in 0 until channels) {
 				val pixelValues = mutableListOf<Int>()
 				for (dy in -padSize..padSize) {
 					for (dx in -padSize..padSize) {
