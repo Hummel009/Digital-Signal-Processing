@@ -12,13 +12,10 @@ fun sobelOperator(imageArray: Array<Array<IntArray>>): Array<Array<IntArray>> {
 		intArrayOf(1, 2, 1), intArrayOf(0, 0, 0), intArrayOf(-1, -2, -1)
 	)
 
-	// Prepare output array.
-	val height = imageArray.size
-	val width = imageArray[0].size
-	// Initialize a new array to hold RGB values.
-	val gradientMagnitudeRGB = Array(height) { Array(width) { IntArray(3) } }
+	val (height, width) = extractDimensions(imageArray)
 
-	// Apply Sobel operator.
+	val gradientMagnitudeRGB = Array(height) { Array(width) { IntArray(channels) } }
+
 	for (y in 1 until height - 1) {
 		for (x in 1 until width - 1) {
 			var gxR = 0.0
@@ -28,7 +25,7 @@ fun sobelOperator(imageArray: Array<Array<IntArray>>): Array<Array<IntArray>> {
 			var gyG = 0.0
 			var gyB = 0.0
 
-			// Calculate gradients.
+			// Calculate gradients
 			for (i in -1..1) {
 				for (j in -1..1) {
 					gxR += imageArray[y + i][x + j][0] * sobelX[i + 1][j + 1]
@@ -41,7 +38,7 @@ fun sobelOperator(imageArray: Array<Array<IntArray>>): Array<Array<IntArray>> {
 				}
 			}
 
-			// Compute gradient magnitude.
+			// Compute gradient magnitude
 			gradientMagnitudeRGB[y][x][0] = sqrt(gxR * gxR + gyR * gyR).toInt().coerceIn(0..255)
 			gradientMagnitudeRGB[y][x][1] = sqrt(gxG * gxG + gyG * gyG).toInt().coerceIn(0..255)
 			gradientMagnitudeRGB[y][x][2] = sqrt(gxB * gxB + gyB * gyB).toInt().coerceIn(0..255)

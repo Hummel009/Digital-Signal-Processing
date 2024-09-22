@@ -1,10 +1,10 @@
 package com.github.hummel.dsp.lab3
 
-fun applyMedianBlur(imageArray: Array<Array<IntArray>>, kernelSize: Int): Array<Array<IntArray>> {
-	val height = imageArray.size
-	val width = imageArray[0].size
-	val padSize = kernelSize / 2
-	val filteredImage = Array(height) { Array(width) { IntArray(3) } }
+fun applyMedianBlur(imageArray: Array<Array<IntArray>>, boxSize: Int): Array<Array<IntArray>> {
+	val (height, width) = extractDimensions(imageArray)
+	val padSize = boxSize / 2
+
+	val blurredImage = Array(height) { Array(width) { IntArray(channels) } }
 
 	for (y in padSize until height - padSize) {
 		for (x in padSize until width - padSize) {
@@ -16,10 +16,10 @@ fun applyMedianBlur(imageArray: Array<Array<IntArray>>, kernelSize: Int): Array<
 					}
 				}
 				pixelValues.sort()
-				filteredImage[y][x][c] = pixelValues[pixelValues.size / 2] // Get median value.
+				blurredImage[y][x][c] = pixelValues[pixelValues.size / 2] // Get median value.
 			}
 		}
 	}
 
-	return filteredImage
+	return blurredImage
 }

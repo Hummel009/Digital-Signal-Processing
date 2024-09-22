@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
+const val PI: Float = 3.141592653589793f
+
 const val channels: Int = 3
 
 fun main() {
@@ -20,7 +22,7 @@ fun main() {
 	val boxBlurredImage = applyBoxBlur(imageArray, 7)
 	saveImageFromArray(boxBlurredImage, boxOutput)
 
-	val gaussBlurredImage = applyGaussianBlur(imageArray, 14, 3.0)
+	val gaussBlurredImage = applyGaussianBlur(imageArray, 14, 3.0f)
 	saveImageFromArray(gaussBlurredImage, gausOutput)
 
 	val medianBlurredImage = applyMedianBlur(imageArray, 5)
@@ -49,8 +51,7 @@ private fun loadImageAsArray(imagePath: String): Array<Array<IntArray>> {
 }
 
 private fun saveImageFromArray(imageArray: Array<Array<IntArray>>, outputPath: String) {
-	val height = imageArray.size
-	val width = imageArray[0].size
+	val (height, width) = extractDimensions(imageArray)
 	val img = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
 
 	for (y in 0 until height) {
@@ -71,4 +72,10 @@ private fun mdIfNot(path: String): File {
 		soundsDir.mkdirs()
 	}
 	return soundsDir
+}
+
+fun extractDimensions(imageArray: Array<Array<IntArray>>): Pair<Int, Int> {
+	val height = imageArray.size
+	val width = imageArray[0].size
+	return Pair(height, width)
 }
