@@ -110,8 +110,8 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 }
 
 private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
-	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size * duration }.toDoubleArray()
-	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }.toDoubleArray()
+	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size * duration }
+	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
 
 	val chart = XYChart(1600, 900)
 	chart.title = title
