@@ -6,10 +6,11 @@ fun applyMedianBlur(imageArray: Array<Array<IntArray>>, boxSize: Int): Array<Arr
 
 	val blurredImage = Array(height) { Array(width) { IntArray(channels) } }
 
-	for (y in padSize until height - padSize) {
-		for (x in padSize until width - padSize) {
+	for (y in 0 until height) {
+		for (x in 0 until width) {
 			for (c in 0 until channels) {
 				val pixelValues = mutableListOf<Int>()
+				var count = 0
 				for (dy in -padSize..padSize) {
 					for (dx in -padSize..padSize) {
 						val newY = y + dy
@@ -17,11 +18,12 @@ fun applyMedianBlur(imageArray: Array<Array<IntArray>>, boxSize: Int): Array<Arr
 
 						if (newY in 0 until height && newX in 0 until width) {
 							pixelValues.add(imageArray[newY][newX][c])
+							count++
 						}
 					}
 				}
 				pixelValues.sort()
-				blurredImage[y][x][c] = pixelValues[pixelValues.size / 2]
+				blurredImage[y][x][c] = if (count > 0) pixelValues[pixelValues.size / 2] else 0
 			}
 		}
 	}

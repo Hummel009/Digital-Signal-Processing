@@ -6,10 +6,12 @@ fun applyBoxBlur(imageArray: Array<Array<IntArray>>, boxSize: Int): Array<Array<
 
 	val blurredImage = Array(height) { Array(width) { IntArray(channels) } }
 
-	for (y in padSize until height - padSize) {
-		for (x in padSize until width - padSize) {
+	for (y in 0 until height) {
+		for (x in 0 until width) {
 			for (c in 0 until channels) {
 				var sum = 0.0f
+				var count = 0
+
 				for (dy in -padSize..padSize) {
 					for (dx in -padSize..padSize) {
 						val newY = y + dy
@@ -17,11 +19,12 @@ fun applyBoxBlur(imageArray: Array<Array<IntArray>>, boxSize: Int): Array<Array<
 
 						if (newY in 0 until height && newX in 0 until width) {
 							sum += imageArray[newY][newX][c]
+							count++
 						}
 					}
 				}
-				val area = boxSize * boxSize
-				blurredImage[y][x][c] = (sum / area).toInt()
+
+				blurredImage[y][x][c] = if (count > 0) (sum / count).toInt() else 0
 			}
 		}
 	}
