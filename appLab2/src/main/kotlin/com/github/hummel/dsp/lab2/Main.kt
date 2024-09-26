@@ -68,25 +68,39 @@ fun main() {
 		deconstructedSignal
 	}
 
-	val amplitudeSpectrum = computeAmplitudeSpectrum(transformed)
-	val phaseSpectrum = computePhaseSpectrum(transformed)
+	val amplitudeSpectrum = computeAmplitudeSpectrum(transformed.copyOf())
+	val phaseSpectrum = computePhaseSpectrum(transformed.copyOf())
 
 	saveFrequencyPlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
 	saveFrequencyPlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 
 	val lowPassFiltered = lowPassFilter(
-		amplitudeSpectrum, cutoffFrequency = defaultFrequency / 2
+		transformed.copyOf(), cutoffFrequency = defaultFrequency / 10
 	)
 	val highPassFiltered = highPassFilter(
-		amplitudeSpectrum, cutoffFrequency = defaultFrequency / 2
+		transformed.copyOf(), cutoffFrequency = defaultFrequency / 10 * 9
 	)
 	val bandPassFiltered = bandPassFilter(
-		amplitudeSpectrum, cutoffFrequencyL = defaultFrequency / 4, cutoffFrequencyH = defaultFrequency * 3 / 4
+		transformed.copyOf(), cutoffFrequencyL = defaultFrequency / 10 * 4, cutoffFrequencyH = defaultFrequency / 10 * 6
 	)
 
-	saveFrequencyPlot(filterDir, "low_pass", lowPassFiltered, "Low Pass")
-	saveFrequencyPlot(filterDir, "high_pass", highPassFiltered, "High Pass")
-	saveFrequencyPlot(filterDir, "band_pass", bandPassFiltered, "Band Pass")
+	saveFrequencyPlot(
+		filterDir, "ampl_low_pass", lowPassFiltered.copyOf().map { it.real }.toFloatArray(), "Low Pass"
+	)
+	saveFrequencyPlot(
+		filterDir, "ampl_high_pass", highPassFiltered.copyOf().map { it.real }.toFloatArray(), "High Pass"
+	)
+	saveFrequencyPlot(
+		filterDir, "ampl_band_pass", bandPassFiltered.copyOf().map { it.real }.toFloatArray(), "Band Pass"
+	)
+
+	saveFrequencyPlot(filterDir, "sound_low_pass", ifft(lowPassFiltered.copyOf()), "Low Pass")
+	saveFrequencyPlot(filterDir, "sound_high_pass", ifft(highPassFiltered.copyOf()), "High Pass")
+	saveFrequencyPlot(filterDir, "sound_band_pass", ifft(bandPassFiltered.copyOf()), "Band Pass")
+
+	saveWav(soundsDir, "low_pass", ifft(lowPassFiltered.copyOf()))
+	saveWav(soundsDir, "high_pass", ifft(highPassFiltered.copyOf()))
+	saveWav(soundsDir, "band_pass", ifft(bandPassFiltered.copyOf()))
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {

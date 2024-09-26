@@ -1,44 +1,36 @@
 package com.github.hummel.dsp.lab2
 
-fun lowPassFilter(spectrum: FloatArray, cutoffFrequency: Float): FloatArray {
-	if (cutoffFrequency == 0.0f) return spectrum
-
-	val n = spectrum.size
-	val result = FloatArray(n)
+fun lowPassFilter(transformed: Array<Complex>, cutoffFrequency: Float): Array<Complex> {
+	val n = transformed.size
+	val result = Array<Complex>(n) { Complex(0.0f, 0.0f) }
 
 	for (i in 0 until n) {
 		val f = (i * defaultFrequency) / n
-		result[i] = if (f > cutoffFrequency) 0.0f else spectrum[i]
+		result[i] = if (f > cutoffFrequency) Complex(0.0f, 0.0f) else transformed[i]
 	}
 
 	return result
 }
 
-fun highPassFilter(spectrum: FloatArray, cutoffFrequency: Float): FloatArray {
-	if (cutoffFrequency == 0.0f) return spectrum
-
-	val n = spectrum.size
-	val result = FloatArray(n)
+fun highPassFilter(transformed: Array<Complex>, cutoffFrequency: Float): Array<Complex> {
+	val n = transformed.size
+	val result = Array<Complex>(n) { Complex(0.0f, 0.0f) }
 
 	for (i in 0 until n) {
 		val f = (i * defaultFrequency) / n
-		result[i] = if (f < cutoffFrequency) 0.0f else spectrum[i]
+		result[i] = if (f < cutoffFrequency) Complex(0.0f, 0.0f) else transformed[i]
 	}
 
 	return result
 }
 
-fun bandPassFilter(
-	spectrum: FloatArray, cutoffFrequencyL: Float, cutoffFrequencyH: Float
-): FloatArray {
-	if (cutoffFrequencyL == 0.0f && cutoffFrequencyH == 0.0f) return spectrum
-
-	val n = spectrum.size
-	val result = FloatArray(n)
+fun bandPassFilter(transformed: Array<Complex>, cutoffFrequencyL: Float, cutoffFrequencyH: Float): Array<Complex> {
+	val n = transformed.size
+	val result = Array<Complex>(n) { Complex(0.0f, 0.0f) }
 
 	for (i in 0 until n) {
 		val f = (i * defaultFrequency) / n
-		result[i] = if (f < cutoffFrequencyL || f > cutoffFrequencyH) 0.0f else spectrum[i]
+		result[i] = if (f < cutoffFrequencyL || f > cutoffFrequencyH) Complex(0.0f, 0.0f) else transformed[i]
 	}
 
 	return result
