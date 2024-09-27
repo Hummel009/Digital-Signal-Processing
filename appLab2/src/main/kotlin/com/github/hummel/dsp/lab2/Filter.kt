@@ -1,37 +1,22 @@
 package com.github.hummel.dsp.lab2
 
-fun lowPassFilter(transformed: Array<Complex>, cutoffFrequency: Float): Array<Complex> {
-	val n = transformed.size
-	val result = Array<Complex>(n) { Complex(0.0f, 0.0f) }
-
-	for (i in 0 until n) {
-		val f = (i * defaultFrequency) / n
-		result[i] = if (f > cutoffFrequency) Complex(0.0f, 0.0f) else transformed[i]
-	}
-
-	return result
+fun lowPassFilter(fftResult: Array<Complex>, cutoff: Float): Array<Complex> {
+	return fftResult.mapIndexed { index, complex ->
+		val frequency = index * (sampleRate / fftResult.size)
+		if (frequency > cutoff) Complex(0.0f, 0.0f) else complex
+	}.toTypedArray()
 }
 
-fun highPassFilter(transformed: Array<Complex>, cutoffFrequency: Float): Array<Complex> {
-	val n = transformed.size
-	val result = Array<Complex>(n) { Complex(0.0f, 0.0f) }
-
-	for (i in 0 until n) {
-		val f = (i * defaultFrequency) / n
-		result[i] = if (f < cutoffFrequency) Complex(0.0f, 0.0f) else transformed[i]
-	}
-
-	return result
+fun highPassFilter(fftResult: Array<Complex>, cutoff: Float): Array<Complex> {
+	return fftResult.mapIndexed { index, complex ->
+		val frequency = index * (sampleRate / fftResult.size)
+		if (frequency < cutoff) Complex(0.0f, 0.0f) else complex
+	}.toTypedArray()
 }
 
-fun bandPassFilter(transformed: Array<Complex>, cutoffFrequencyL: Float, cutoffFrequencyH: Float): Array<Complex> {
-	val n = transformed.size
-	val result = Array<Complex>(n) { Complex(0.0f, 0.0f) }
-
-	for (i in 0 until n) {
-		val f = (i * defaultFrequency) / n
-		result[i] = if (f < cutoffFrequencyL || f > cutoffFrequencyH) Complex(0.0f, 0.0f) else transformed[i]
-	}
-
-	return result
+fun bandPassFilter(fftResult: Array<Complex>, cutoff: ClosedFloatingPointRange<Float>): Array<Complex> {
+	return fftResult.mapIndexed { index, complex ->
+		val frequency = index * (sampleRate / fftResult.size)
+		if (frequency in cutoff) complex else Complex(0.0f, 0.0f)
+	}.toTypedArray()
 }

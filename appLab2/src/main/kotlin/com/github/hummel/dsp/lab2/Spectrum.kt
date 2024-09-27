@@ -1,13 +1,12 @@
 package com.github.hummel.dsp.lab2
 
-fun computeAmplitudeSpectrum(spectrum: Array<Complex>): FloatArray {
-	return FloatArray(spectrum.size) { k ->
-		2 * spectrum[k].magnitude / spectrum.size
-	}
-}
+fun decomposeSignal(fftResult: Array<Complex>): Pair<FloatArray, FloatArray> {
+	val amplitude = FloatArray(fftResult.size)
+	val phase = FloatArray(fftResult.size)
 
-fun computePhaseSpectrum(spectrum: Array<Complex>): FloatArray {
-	return FloatArray(spectrum.size) { k ->
-		spectrum[k].phase
+	for (i in fftResult.indices) {
+		amplitude[i] = fftResult[i].magnitude
+		phase[i] = fftResult[i].phase
 	}
+	return Pair(amplitude, phase)
 }

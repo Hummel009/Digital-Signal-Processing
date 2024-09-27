@@ -68,35 +68,34 @@ fun main() {
 		deconstructedSignal
 	}
 
-	val amplitudeSpectrum = computeAmplitudeSpectrum(transformed.copyOf())
-	val phaseSpectrum = computePhaseSpectrum(transformed.copyOf())
+	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(transformed.copyOf())
 
-	saveFrequencyPlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
-	saveFrequencyPlot(spectrumDir, "phase", phaseSpectrum, "Phase")
+	saveTimePlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
+	saveTimePlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 
 	val lowPassFiltered = lowPassFilter(
-		transformed.copyOf(), cutoffFrequency = defaultFrequency / 10
+		transformed.copyOf(), cutoff = 4000f
 	)
 	val highPassFiltered = highPassFilter(
-		transformed.copyOf(), cutoffFrequency = defaultFrequency / 10 * 9
+		transformed.copyOf(), cutoff = 40000f
 	)
 	val bandPassFiltered = bandPassFilter(
-		transformed.copyOf(), cutoffFrequencyL = defaultFrequency / 10 * 4, cutoffFrequencyH = defaultFrequency / 10 * 6
+		transformed.copyOf(), cutoff = 4000f..40000f
 	)
 
-	saveFrequencyPlot(
+	saveTimePlot(
 		filterDir, "ampl_low_pass", lowPassFiltered.copyOf().map { it.real }.toFloatArray(), "Low Pass"
 	)
-	saveFrequencyPlot(
+	saveTimePlot(
 		filterDir, "ampl_high_pass", highPassFiltered.copyOf().map { it.real }.toFloatArray(), "High Pass"
 	)
-	saveFrequencyPlot(
+	saveTimePlot(
 		filterDir, "ampl_band_pass", bandPassFiltered.copyOf().map { it.real }.toFloatArray(), "Band Pass"
 	)
 
-	saveFrequencyPlot(filterDir, "sound_low_pass", ifft(lowPassFiltered.copyOf()), "Low Pass")
-	saveFrequencyPlot(filterDir, "sound_high_pass", ifft(highPassFiltered.copyOf()), "High Pass")
-	saveFrequencyPlot(filterDir, "sound_band_pass", ifft(bandPassFiltered.copyOf()), "Band Pass")
+	saveTimePlot(filterDir, "sound_low_pass", ifft(lowPassFiltered.copyOf()), "Low Pass")
+	saveTimePlot(filterDir, "sound_high_pass", ifft(highPassFiltered.copyOf()), "High Pass")
+	saveTimePlot(filterDir, "sound_band_pass", ifft(bandPassFiltered.copyOf()), "Band Pass")
 
 	saveWav(soundsDir, "low_pass", ifft(lowPassFiltered.copyOf()))
 	saveWav(soundsDir, "high_pass", ifft(highPassFiltered.copyOf()))
@@ -115,18 +114,6 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 		ByteArrayInputStream(data), audioFormat, signal.size.toLong()
 	)
 	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename + ".wav"))
-}
-
-private fun saveFrequencyPlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
-	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size * defaultFrequency }
-	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
-
-	val chart = XYChart(1600, 900)
-	chart.title = title
-	chart.xAxisTitle = "Frequency (Hz)"
-	chart.yAxisTitle = "Amplitude"
-	chart.addSeries(title, xData, yData)
-	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
 }
 
 private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
