@@ -12,7 +12,7 @@ import kotlin.math.abs
 
 const val PI: Float = 3.141592653589793f
 
-const val duration: Float = 5.0f //sec
+const val duration: Float = 6.0f //sec
 
 const val sampleRate: Float = 44100.0f //N
 const val dutyCycle: Float = 0.5f //d
@@ -47,7 +47,7 @@ fun main() {
 	val input = readln()
 
 	val spectrum = if (input.lowercase() == "dft") {
-		require(paddedSignal.size < 1000) { "Too large sample rate for this non-optimized method." }
+		require(paddedSignal.size < 5000) { "Too large sample rate for this non-optimized method." }
 
 		val deconstructedSignal = dft(paddedSignal)
 		val reconstructedSignal = idft(deconstructedSignal)
@@ -74,8 +74,21 @@ fun main() {
 
 	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum.copyOf())
 
-	saveTimePlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
-	saveTimePlot(spectrumDir, "phase", phaseSpectrum, "Phase")
+	val amplitudeChart = XYChart(1600, 900)
+	amplitudeChart.title = "Амплитудный спектр"
+	amplitudeChart.xAxisTitle = "Частота"
+	amplitudeChart.yAxisTitle = "Амплитуда"
+	amplitudeChart.addSeries(
+		"Амплитуда", (0 until amplitudeSpectrum.size).map { it.toDouble() }, amplitudeSpectrum.toList()
+	)
+	BitmapEncoder.saveBitmap(amplitudeChart, spectrumDir.path + "/amplitude", BitmapFormat.JPG)
+
+	val phaseChart = XYChart(1600, 900)
+	phaseChart.title = "Фазовый спектр"
+	phaseChart.xAxisTitle = "Частота"
+	phaseChart.yAxisTitle = "Фаза (рад)"
+	phaseChart.addSeries("Фаза", (0 until phaseSpectrum.size).map { it.toDouble() }, phaseSpectrum.toList())
+	BitmapEncoder.saveBitmap(phaseChart, spectrumDir.path + "/phase", BitmapFormat.JPG)
 
 	val lowPassFiltered = lowPassFilter(
 		spectrum, passUntil = 750.0f
