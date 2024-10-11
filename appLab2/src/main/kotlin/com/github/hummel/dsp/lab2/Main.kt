@@ -79,7 +79,9 @@ fun main() {
 	amplitudeChart.xAxisTitle = "Частота"
 	amplitudeChart.yAxisTitle = "Амплитуда"
 	amplitudeChart.addSeries(
-		"Амплитуда", (0 until amplitudeSpectrum.size).map { it.toDouble() }, amplitudeSpectrum.toList()
+		"Амплитуда",
+		(0 until amplitudeSpectrum.size step 100).map { it.toDouble() },
+		amplitudeSpectrum.filterIndexed { index, _ -> index % 100 == 0 }.toList()
 	)
 	BitmapEncoder.saveBitmap(amplitudeChart, spectrumDir.path + "/amplitude", BitmapFormat.JPG)
 
@@ -87,7 +89,11 @@ fun main() {
 	phaseChart.title = "Фазовый спектр"
 	phaseChart.xAxisTitle = "Частота"
 	phaseChart.yAxisTitle = "Фаза (рад)"
-	phaseChart.addSeries("Фаза", (0 until phaseSpectrum.size).map { it.toDouble() }, phaseSpectrum.toList())
+	phaseChart.addSeries(
+		"Фаза",
+		(0 until phaseSpectrum.size step 100).map { it.toDouble() },
+		phaseSpectrum.filterIndexed { index, _ -> index % 100 == 0 }.toList()
+	)
 	BitmapEncoder.saveBitmap(phaseChart, spectrumDir.path + "/phase", BitmapFormat.JPG)
 
 	val lowPassFiltered = lowPassFilter(
