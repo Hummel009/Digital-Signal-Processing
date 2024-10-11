@@ -79,18 +79,8 @@ fun main() {
 
 	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum.copyOf())
 
-	saveAmplPlot(spectrumDir, "amplitude", amplitudeSpectrum)
-
-	val phaseChart = XYChart(1600, 900)
-	phaseChart.title = "Фазовый спектр"
-	phaseChart.xAxisTitle = "Частота"
-	phaseChart.yAxisTitle = "Фаза (рад)"
-	phaseChart.addSeries(
-		"Фаза",
-		(0 until phaseSpectrum.size step 1).map { it.toDouble() },
-		phaseSpectrum.filterIndexed { index, _ -> index % skip == 0 }.toList()
-	)
-	BitmapEncoder.saveBitmap(phaseChart, spectrumDir.path + "/phase", BitmapFormat.JPG)
+	saveAmplitudePlot(spectrumDir, "amplitude", amplitudeSpectrum)
+	savePhasePlot(spectrumDir, "phase", phaseSpectrum)
 
 	val lowPassFiltered = lowPassFilter(
 		spectrum, passUntil = 2.0f
@@ -102,13 +92,13 @@ fun main() {
 		spectrum, passIn = 2.0f..4.0f
 	)
 
-	saveAmplPlot(
+	saveAmplitudePlot(
 		filterDir, "ampl_low_pass", lowPassFiltered.copyOf().map { it.magnitude }.toFloatArray()
 	)
-	saveAmplPlot(
+	saveAmplitudePlot(
 		filterDir, "ampl_high_pass", highPassFiltered.copyOf().map { it.magnitude }.toFloatArray()
 	)
-	saveAmplPlot(
+	saveAmplitudePlot(
 		filterDir, "ampl_band_pass", bandPassFiltered.copyOf().map { it.magnitude }.toFloatArray()
 	)
 
@@ -125,19 +115,34 @@ fun main() {
 	saveWav(soundsDir, "band_pass", bandPassSignal)
 }
 
-private fun saveAmplPlot(dir: File, filename: String, amplitudeSpectrum: FloatArray) {
-	val frequencies = (0 until amplitudeSpectrum.size step skip).map {
-		(it * sampleRate / amplitudeSpectrum.size).toDouble()
+private fun savePhasePlot(dir: File, filename: String, spectrum: FloatArray) {
+	val frequencies = (0 until spectrum.size step skip).map {
+		(it * sampleRate / spectrum.size).toDouble()
 	}
 
-	val amplitudeChart = XYChart(1600, 900)
-	amplitudeChart.title = "Амплитудный спектр"
-	amplitudeChart.xAxisTitle = "Частота"
-	amplitudeChart.yAxisTitle = "Амплитуда"
-	amplitudeChart.addSeries(
-		"Амплитуда", frequencies, amplitudeSpectrum.filterIndexed { index, _ -> index % skip == 0 }.toList()
+	val chart = XYChart(1600, 900)
+	chart.title = "Фазовый спектр"
+	chart.xAxisTitle = "Частота"
+	chart.yAxisTitle = "Фаза (рад)"
+	chart.addSeries(
+		"Фаза", frequencies, spectrum.filterIndexed { index, _ -> index % skip == 0 }.toList()
 	)
-	BitmapEncoder.saveBitmap(amplitudeChart, dir.path + "/" + filename, BitmapFormat.JPG)
+	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
+}
+
+private fun saveAmplitudePlot(dir: File, filename: String, spectrum: FloatArray) {
+	val frequencies = (0 until spectrum.size step skip).map {
+		(it * sampleRate / spectrum.size).toDouble()
+	}
+
+	val chart = XYChart(1600, 900)
+	chart.title = "Амплитудный спектр"
+	chart.xAxisTitle = "Частота"
+	chart.yAxisTitle = "Амплитуда"
+	chart.addSeries(
+		"Амплитуда", frequencies, spectrum.filterIndexed { index, _ -> index % skip == 0 }.toList()
+	)
+	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
