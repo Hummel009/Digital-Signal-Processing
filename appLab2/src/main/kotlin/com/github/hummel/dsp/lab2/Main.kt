@@ -29,7 +29,11 @@ fun main() {
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
-	var signal = generatePulseWave()
+	var signal = generateSineWave(frequency = 500.0f).zip(generateSineWave(frequency = 1000.0f)) { a, b ->
+		a + b
+	}.toFloatArray().zip(generateSineWave(frequency = 1500.0f)) { a, b ->
+		a + b
+	}.toFloatArray()
 
 	val originalSize = signal.size
 	val nearestPowerOfTwo = 1 shl (32 - Integer.numberOfLeadingZeros(originalSize - 1))
@@ -74,13 +78,13 @@ fun main() {
 	saveTimePlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 
 	val lowPassFiltered = lowPassFilter(
-		transformed.copyOf(), cutoff = 4000f
+		transformed, passUntil = 550.0f
 	)
 	val highPassFiltered = highPassFilter(
-		transformed.copyOf(), cutoff = 40000f
+		transformed, passFrom = 1450.0f
 	)
 	val bandPassFiltered = bandPassFilter(
-		transformed.copyOf(), cutoff = 4000f..40000f
+		transformed, passIn = 950.0f..1050.0f
 	)
 
 	saveFrequencyPlot(
@@ -122,7 +126,6 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 
 private fun saveFrequencyPlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
 	val xData = (0 until signal.size step skip).map { it.toDouble() / (signal.size / sampleRate) / 1000 }
-	println(signal.size)
 	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
 
 	val chart = XYChart(1600, 900)

@@ -1,22 +1,28 @@
 package com.github.hummel.dsp.lab2
 
-fun lowPassFilter(fftResult: Array<Complex>, cutoff: Float): Array<Complex> {
-	return fftResult.mapIndexed { index, complex ->
-		val frequency = index * (sampleRate / fftResult.size)
-		if (frequency > cutoff) Complex(0.0f, 0.0f) else complex
+fun lowPassFilter(
+	fftResult: Array<Complex>, passUntil: Float
+): Array<Complex> {
+	return fftResult.copyOf().mapIndexed { index, complex ->
+		val frequency = (index * sampleRate) / fftResult.size
+		if (frequency <= passUntil) complex else Complex(0.0f, complex.imaginary)
 	}.toTypedArray()
 }
 
-fun highPassFilter(fftResult: Array<Complex>, cutoff: Float): Array<Complex> {
-	return fftResult.mapIndexed { index, complex ->
-		val frequency = index * (sampleRate / fftResult.size)
-		if (frequency < cutoff) Complex(0.0f, 0.0f) else complex
+fun highPassFilter(
+	fftResult: Array<Complex>, passFrom: Float
+): Array<Complex> {
+	return fftResult.copyOf().mapIndexed { index, complex ->
+		val frequency = (index * sampleRate) / fftResult.size
+		if (frequency >= passFrom) complex else Complex(0.0f, complex.imaginary)
 	}.toTypedArray()
 }
 
-fun bandPassFilter(fftResult: Array<Complex>, cutoff: ClosedFloatingPointRange<Float>): Array<Complex> {
-	return fftResult.mapIndexed { index, complex ->
-		val frequency = index * (sampleRate / fftResult.size)
-		if (frequency in cutoff) complex else Complex(0.0f, 0.0f)
+fun bandPassFilter(
+	fftResult: Array<Complex>, passIn: ClosedFloatingPointRange<Float>
+): Array<Complex> {
+	return fftResult.copyOf().mapIndexed { index, complex ->
+		val frequency = (index * sampleRate) / fftResult.size
+		if (frequency in passIn) complex else Complex(0.0f, complex.imaginary)
 	}.toTypedArray()
 }
