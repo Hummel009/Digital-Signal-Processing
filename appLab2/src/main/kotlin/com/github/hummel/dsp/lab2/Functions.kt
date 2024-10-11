@@ -6,9 +6,9 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 fun generateSineWave(
-	amplitude: Float = defaultAmplitude, frequency: Float = defaultFrequency
+	s: Int = samples, amplitude: Float = defaultAmplitude, frequency: Float = defaultFrequency
 ): FloatArray {
-	return FloatArray(samples) { n ->
+	return FloatArray(s) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
 		amplitude * sin(value)
 	}
