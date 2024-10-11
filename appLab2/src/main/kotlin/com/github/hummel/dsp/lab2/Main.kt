@@ -32,11 +32,11 @@ fun main() {
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
-	val signal = generateSineWave(
+	val signal = generatePulseWave(
 		s = samples / 3, frequency = 5.0f
-	) + generateSineWave(
+	) + generatePulseWave(
 		s = samples / 3, frequency = 3.0f
-	) + generateSineWave(
+	) + generatePulseWave(
 		s = samples / 3, frequency = 1.0f
 	)
 

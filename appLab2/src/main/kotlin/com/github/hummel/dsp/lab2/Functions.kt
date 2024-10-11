@@ -15,9 +15,9 @@ fun generateSineWave(
 }
 
 fun generatePulseWave(
-	amplitude: Float = defaultAmplitude, frequency: Float = defaultFrequency
+	s: Int = samples, amplitude: Float = defaultAmplitude, frequency: Float = defaultFrequency
 ): FloatArray {
-	return FloatArray(samples) { n ->
+	return FloatArray(s) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
 		if (value % (2 * PI) / (2 * PI) <= dutyCycle) amplitude else -amplitude
 	}
