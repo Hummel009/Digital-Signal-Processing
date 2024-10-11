@@ -1,9 +1,9 @@
 package com.github.hummel.dsp.lab2
 
-fun decomposeSignal(fftResult: Array<Complex>): Pair<FloatArray, FloatArray> {
-	return fftResult.map {
+fun decomposeSignal(spectrum: Array<Complex>): Pair<FloatArray, FloatArray> {
+	return spectrum.map {
 		it.magnitude
-	}.toFloatArray() to fftResult.map {
+	}.toFloatArray() to spectrum.map {
 		it.phase
 	}.toFloatArray()
 }

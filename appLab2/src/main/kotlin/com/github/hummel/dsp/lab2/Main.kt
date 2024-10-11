@@ -29,7 +29,7 @@ fun main() {
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
-	var signal = generateSineWave(frequency = 500.0f).zip(generateSineWave(frequency = 1000.0f)) { a, b ->
+	val signal = generateSineWave(frequency = 500.0f).zip(generateSineWave(frequency = 1000.0f)) { a, b ->
 		a + b
 	}.toFloatArray().zip(generateSineWave(frequency = 1500.0f)) { a, b ->
 		a + b
@@ -46,7 +46,7 @@ fun main() {
 	println("Which mode: «dft» or «fft»?")
 	val input = readln()
 
-	val transformed = if (input.lowercase() == "dft") {
+	val spectrum = if (input.lowercase() == "dft") {
 		require(paddedSignal.size < 1000) { "Too large sample rate for this non-optimized method." }
 
 		val deconstructedSignal = dft(paddedSignal)
@@ -56,7 +56,7 @@ fun main() {
 		saveTimePlot(graphsDir, "reco_dft", reconstructedSignal, "RECO DFT")
 
 		val error = paddedSignal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-		println("Average BFT Reconstruction Error: ${String.format("%.8f", error)}")
+		println("Average BFT Reconstruction Error: ${"%.8f".format(error)}")
 
 		deconstructedSignal
 	} else {
@@ -67,34 +67,24 @@ fun main() {
 		saveTimePlot(graphsDir, "reco_fft", reconstructedSignal, "RECO FFT")
 
 		val error = paddedSignal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-		println("Average FFT Reconstruction Error: ${String.format("%.8f", error)}")
+		println("Average FFT Reconstruction Error: ${"%.8f".format(error)}")
 
 		deconstructedSignal
 	}
 
-	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(transformed.copyOf())
+	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum.copyOf())
 
 	saveTimePlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
 	saveTimePlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 
 	val lowPassFiltered = lowPassFilter(
-		transformed, passUntil = 550.0f
+		spectrum, passUntil = 750.0f
 	)
 	val highPassFiltered = highPassFilter(
-		transformed, passFrom = 1450.0f
+		spectrum, passFrom = 1250.0f
 	)
 	val bandPassFiltered = bandPassFilter(
-		transformed, passIn = 950.0f..1050.0f
-	)
-
-	saveFrequencyPlot(
-		filterDir, "ampl_low_pass", lowPassFiltered.map { it.real }.toFloatArray(), "Low Pass"
-	)
-	saveFrequencyPlot(
-		filterDir, "ampl_high_pass", highPassFiltered.map { it.real }.toFloatArray(), "High Pass"
-	)
-	saveFrequencyPlot(
-		filterDir, "ampl_band_pass", bandPassFiltered.map { it.real }.toFloatArray(), "Band Pass"
+		spectrum, passIn = 750.0f..1250.0f
 	)
 
 	val lowPassSignal = ifft(lowPassFiltered)
@@ -122,18 +112,6 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 		ByteArrayInputStream(data), audioFormat, signal.size.toLong()
 	)
 	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename + ".wav"))
-}
-
-private fun saveFrequencyPlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
-	val xData = (0 until signal.size step skip).map { it.toDouble() / (signal.size / sampleRate) / 1000 }
-	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
-
-	val chart = XYChart(1600, 900)
-	chart.title = title
-	chart.xAxisTitle = "Frequency (kHz)"
-	chart.yAxisTitle = "Amplitude"
-	chart.addSeries(title, xData, yData)
-	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
 }
 
 private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
