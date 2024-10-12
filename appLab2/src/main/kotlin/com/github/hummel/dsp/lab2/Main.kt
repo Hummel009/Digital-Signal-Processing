@@ -13,16 +13,9 @@ import kotlin.math.ceil
 
 const val PI: Float = 3.141592653589793f
 
-const val duration: Float = 6.0f //sec
-
-const val sampleRate: Float = 100.0f //N
-const val dutyCycle: Float = 0.5f //d
+const val sampleRate: Int = 44100 //N
 const val phase: Float = 0.0f //ф
-
-var defaultAmplitude: Float = 0.5f //A
-var defaultFrequency: Float = 880.0f //f
-
-const val samples: Int = (sampleRate * duration).toInt()
+const val amplitude: Float = 0.5f
 
 val skip: Int = ceil(sampleRate / 440.0f).coerceAtLeast(1.0f).toInt()
 
@@ -32,12 +25,12 @@ fun main() {
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
-	val signal = generatePulseWave(
-		s = samples / 3, frequency = 5.0f
-	) + generatePulseWave(
-		s = samples / 3, frequency = 3.0f
-	) + generatePulseWave(
-		s = samples / 3, frequency = 1.0f
+	val signal = generateSineWave(
+		duration = 1, frequency = 1000.0f
+	) + generateSineWave(
+		duration = 1, frequency = 3000.0f
+	) + generateSineWave(
+		duration = 1, frequency = 5000.0f
 	)
 
 	val originalSize = signal.size
@@ -82,14 +75,14 @@ fun main() {
 	saveAmplitudePlot(spectrumDir, "amplitude", amplitudeSpectrum)
 	savePhasePlot(spectrumDir, "phase", phaseSpectrum)
 
-	val lowPassFiltered = lowPassFilter(
-		spectrum, passUntil = 2.0f
+	val lowPassFiltered = bandPassFilter(
+		spectrum, passIn = 0.0f..2000.0f
 	)
-	val highPassFiltered = highPassFilter(
-		spectrum, passFrom = 4.0f
+	val highPassFiltered = bandPassFilter(
+		spectrum, passIn = 4000.0f..6000.0f
 	)
 	val bandPassFiltered = bandPassFilter(
-		spectrum, passIn = 2.0f..4.0f
+		spectrum, passIn = 2000.0f..4000.0f
 	)
 
 	saveAmplitudePlot(
@@ -146,7 +139,7 @@ private fun saveAmplitudePlot(dir: File, filename: String, spectrum: FloatArray)
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
-	val audioFormat = AudioFormat(sampleRate, 16, 1, true, false)
+	val audioFormat = AudioFormat(sampleRate.toFloat(), 16, 1, true, false)
 	val data = ByteArray(signal.size * 2)
 	for (i in signal.indices) {
 		val value = (signal[i] * Short.MAX_VALUE).toInt().toShort()
@@ -160,7 +153,7 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 }
 
 private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String) {
-	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size * duration }
+	val xData = (0 until signal.size step skip).map { it.toDouble() / sampleRate }
 	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
 
 	val chart = XYChart(1600, 900)
