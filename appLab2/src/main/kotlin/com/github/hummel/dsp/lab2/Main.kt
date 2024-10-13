@@ -19,6 +19,10 @@ const val amplitude: Float = 0.5f
 
 val skip: Int = ceil(sampleRate / 440.0f).coerceAtLeast(1.0f).toInt()
 
+const val a: Float = 1.0f
+const val b: Float = 2.0f
+const val c: Float = 1.0f
+
 fun main() {
 	val soundsDir = mdIfNot("output/sounds")
 	val graphsDir = mdIfNot("output/graphs")
@@ -26,11 +30,11 @@ fun main() {
 	val filterDir = mdIfNot("output/filter")
 
 	val signal = generateSineWave(
-		duration = 1, frequency = 1000.0f
+		duration = a.toInt(), frequency = 1000.0f
 	) + generateSineWave(
-		duration = 1, frequency = 3000.0f
+		duration = b.toInt(), frequency = 3000.0f
 	) + generateSineWave(
-		duration = 1, frequency = 5000.0f
+		duration = c.toInt(), frequency = 5000.0f
 	)
 
 	val originalSize = signal.size
@@ -83,13 +87,13 @@ fun main() {
 	}.toFloatArray(), "Frequency")
 
 	val lowPassFiltered = lowPassFilter(
-		spectrum, passUntil = lastNotZeroVal * 1 / 3.0f
+		spectrum, passUntil = lastNotZeroVal * a / (a + b + c)
 	)
 	val highPassFiltered = highPassFilter(
-		spectrum, passFrom = lastNotZeroVal * 2 / 3.0f
+		spectrum, passFrom = lastNotZeroVal * (a + b) / (a + b + c)
 	)
 	val bandPassFiltered = bandPassFilter(
-		spectrum, passIn = lastNotZeroVal * 1 / 3.0f..lastNotZeroVal * 2 / 3.0f
+		spectrum, passIn = lastNotZeroVal * a / (a + b + c)..lastNotZeroVal * (a + b) / (a + b + c)
 	)
 
 	saveTimePlot(
