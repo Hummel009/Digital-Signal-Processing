@@ -77,8 +77,8 @@ fun main() {
 	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum.copyOf())
 
 	var lastNotZeroVal = 0.0f
-	saveFreqPlot(spectrumDir, "amplitude", amplitudeSpectrum, "Ampl")
-	saveFreqPlot(spectrumDir, "phase", phaseSpectrum, "Phas")
+	saveFreqPlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
+	saveFreqPlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 	saveTimePlot(spectrumDir, "frequency", spectrum.copyOf().mapIndexed { index, complex ->
 		if (complex != Complex(0.0f, 0.0f)) {
 			lastNotZeroVal = index * sampleRate.toFloat() / spectrum.size
@@ -99,17 +99,17 @@ fun main() {
 	saveTimePlot(
 		filterDir, "freq_low_pass", lowPassFiltered.copyOf().mapIndexed { index, complex ->
 			if (complex != Complex(0.0f, 0.0f)) index * sampleRate.toFloat() / spectrum.size else 0.0f
-		}.toFloatArray(), "Freq"
+		}.toFloatArray(), "Frequency"
 	)
 	saveTimePlot(
 		filterDir, "freq_high_pass", highPassFiltered.copyOf().mapIndexed { index, complex ->
 			if (complex != Complex(0.0f, 0.0f)) index * sampleRate.toFloat() / spectrum.size else 0.0f
-		}.toFloatArray(), "Freq"
+		}.toFloatArray(), "Frequency"
 	)
 	saveTimePlot(
 		filterDir, "freq_band_pass", bandPassFiltered.copyOf().mapIndexed { index, complex ->
 			if (complex != Complex(0.0f, 0.0f)) index * sampleRate.toFloat() / spectrum.size else 0.0f
-		}.toFloatArray(), "Freq"
+		}.toFloatArray(), "Frequency"
 	)
 
 	val lowPassSignal = ifft(lowPassFiltered)
@@ -147,7 +147,7 @@ private fun saveFreqPlot(dir: File, filename: String, spectrum: FloatArray, titl
 	val chart = XYChart(1600, 900)
 	chart.title = title
 	chart.xAxisTitle = "Frequency"
-	chart.yAxisTitle = "Value"
+	chart.yAxisTitle = title
 	chart.addSeries(
 		title, frequencies, spectrum.filterIndexed { index, _ -> index % skip == 0 }.toList()
 	)
@@ -161,7 +161,7 @@ private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title:
 	val chart = XYChart(1600, 900)
 	chart.title = title
 	chart.xAxisTitle = "Time (s)"
-	chart.yAxisTitle = "Value"
+	chart.yAxisTitle = title
 	chart.addSeries(title, xData, yData)
 	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
 }
