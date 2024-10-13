@@ -26,11 +26,11 @@ fun main() {
 	val filterDir = mdIfNot("output/filter")
 
 	val signal = generateSineWave(
-		duration = 1, frequency = 5000.0f
+		duration = 1, frequency = 1000.0f
 	) + generateSineWave(
 		duration = 1, frequency = 3000.0f
 	) + generateSineWave(
-		duration = 1, frequency = 1000.0f
+		duration = 1, frequency = 5000.0f
 	)
 
 	val originalSize = signal.size
