@@ -12,3 +12,11 @@ fun generateSineWave(
 		amplitude * sin(value)
 	}
 }
+
+fun generateNoise(
+	duration: Int
+): FloatArray {
+	return FloatArray(sampleRate * duration) {
+		amplitude * (Math.random().toFloat() * 2 - 1)
+	}
+}
