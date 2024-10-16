@@ -14,7 +14,7 @@ import kotlin.math.ceil
 const val PI: Float = 3.141592653589793f
 
 const val duration: Int = 2
-const val sampleRate: Int = 2048 //N
+const val sampleRate: Int = 44100 //N
 const val phase: Float = 0.0f //ф
 const val amplitude: Float = 0.2f
 
@@ -26,9 +26,9 @@ fun main() {
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
-	val signal1 = generateSineWave(300.0f)
-	val signal2 = generateSineWave(400.0f)
-	val signal3 = generateSineWave(500.0f)
+	val signal1 = generateSineWave(1000.0f)
+	val signal2 = generateSineWave(2000.0f)
+	val signal3 = generateSineWave(3000.0f)
 
 	val signal = signal1.zip(signal2) { a, b ->
 		a + b
@@ -79,13 +79,13 @@ fun main() {
 	saveFreqPlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 
 	val lowPassFiltered = lowPassFilter(
-		spectrum, passUntil = 350.0f
+		spectrum, passUntil = 1500.0f
 	)
 	val highPassFiltered = highPassFilter(
-		spectrum, passFrom = 450.0f
+		spectrum, passFrom = 2500.0f
 	)
 	val bandPassFiltered = bandPassFilter(
-		spectrum, passIn = 350.0f..450.0f
+		spectrum, passIn = 1500.0f..2500.0f
 	)
 
 	val lowPassSignal = normalizeAmplitudes(ifft(lowPassFiltered))

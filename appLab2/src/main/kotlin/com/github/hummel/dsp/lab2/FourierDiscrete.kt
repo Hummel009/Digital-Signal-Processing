@@ -9,9 +9,11 @@ fun dft(signal: FloatArray): Array<Complex> {
 
 	for (i in 0 until n) {
 		spectrum[i] = Complex.ZERO
+
+		val angle = 2 * PI * i / n
+
 		for (j in 0 until n) {
-			val angle = 2 * PI * i * j / n
-			val complex = Complex(cos(angle), -sin(angle))
+			val complex = Complex(cos(angle * j), -sin(angle * j))
 			spectrum[i] += complex * signal[j]
 		}
 	}
@@ -25,10 +27,12 @@ fun idft(spectrum: Array<Complex>): FloatArray {
 
 	for (i in 0 until n) {
 		var sum = Complex.ZERO
+
+		val angle = 2 * PI * i / n
+
 		for (j in 0 until n) {
-			val angle = 2 * PI * i * j / n
-			val complex = Complex.fromPolarCoordinates(1.0f, angle)
-			sum += spectrum[j] * complex
+			val complex = Complex(cos(angle * j), sin(angle * j))
+			sum += complex * spectrum[j]
 		}
 
 		result[i] = sum.real / n

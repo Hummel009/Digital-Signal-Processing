@@ -1,8 +1,6 @@
 package com.github.hummel.dsp.lab2
 
 import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.sqrt
 
 data class Complex(val real: Float, val imaginary: Float) {
@@ -42,8 +40,5 @@ data class Complex(val real: Float, val imaginary: Float) {
 
 	companion object {
 		val ZERO = Complex(0.0f, 0.0f)
-
-		fun fromPolarCoordinates(magnitude: Float, angle: Float): Complex =
-			Complex(magnitude * cos(angle), magnitude * sin(angle))
 	}
 }
