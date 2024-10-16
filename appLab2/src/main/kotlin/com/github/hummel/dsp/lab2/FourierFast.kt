@@ -3,29 +3,48 @@ package com.github.hummel.dsp.lab2
 import kotlin.math.cos
 import kotlin.math.sin
 
-fun fft(signalValues: FloatArray): Array<Complex> = fftRecursion(adaptLength(signalValues), false)
+fun fft(signal: FloatArray, signalSize: Int): Array<Complex> {
+	val squareLength = 1 shl (32 - Integer.numberOfLeadingZeros(signalSize - 1))
 
-fun ifft(spectrum: Array<Complex>): FloatArray = fftRecursion(spectrum, true).map { it.real }.toFloatArray()
+	val paddedSignal = FloatArray(squareLength) { 0.0f }
+	signal.copyInto(paddedSignal)
 
-private fun fftRecursion(data: Array<Complex>, invert: Boolean): Array<Complex> {
-	val n = data.size
-	if (n == 1) return data
+	val spectrumView = paddedSignal.map { Complex(it, 0.0f) }.toTypedArray()
+
+	val spectrum = fftRecursion(spectrumView, false)
+
+	return spectrum
+}
+
+fun ifft(spectrum: Array<Complex>, signalSize: Int): FloatArray {
+	val spectrumView = fftRecursion(spectrum, true)
+
+	val paddedSignal = spectrumView.map { it.real }.toFloatArray()
+
+	val signal = paddedSignal.take(signalSize).toFloatArray()
+
+	return signal
+}
+
+private fun fftRecursion(spectrum: Array<Complex>, invert: Boolean): Array<Complex> {
+	val n = spectrum.size
+	if (n == 1) return spectrum
 
 	val result = Array(n) { Complex.ZERO }
 	val even = Array(n / 2) { Complex.ZERO }
 	val odd = Array(n / 2) { Complex.ZERO }
 
 	for (i in 0 until n step 2) {
-		even[i / 2] = data[i]
-		odd[i / 2] = data[i + 1]
+		even[i / 2] = spectrum[i]
+		odd[i / 2] = spectrum[i + 1]
 	}
 
 	val evenRes = fftRecursion(even, invert)
 	val oddRes = fftRecursion(odd, invert)
 
-	val ang = 2 * PI / n * if (invert) -1 else 1
+	val angle = 2 * PI / n * if (invert) -1 else 1
 	var w = Complex(1.0f, 0.0f)
-	val wn = Complex(cos(ang), sin(ang))
+	val wn = Complex(cos(angle), sin(angle))
 
 	for (i in 0 until n / 2) {
 		result[i] = evenRes[i] + w * oddRes[i]
@@ -35,22 +54,6 @@ private fun fftRecursion(data: Array<Complex>, invert: Boolean): Array<Complex> 
 			result[i + n / 2] /= 2.0f
 		}
 		w *= wn
-	}
-
-	return result
-}
-
-private fun adaptLength(data: FloatArray): Array<Complex> {
-	var lengthNew = 1
-	while (lengthNew < data.size) lengthNew *= 2
-	val result = Array(lengthNew) { Complex.ZERO }
-
-	for (i in result.indices) {
-		if (i < data.size) {
-			result[i] = Complex(data[i], 0.0f)
-		} else {
-			result[i] = Complex.ZERO
-		}
 	}
 
 	return result

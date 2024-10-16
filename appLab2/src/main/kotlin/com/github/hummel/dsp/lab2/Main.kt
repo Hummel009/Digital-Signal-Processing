@@ -13,7 +13,7 @@ import kotlin.math.ceil
 
 const val PI: Float = 3.141592653589793f
 
-const val sampleRate: Int = 2048 //N
+const val sampleRate: Int = 44100 //N
 const val dutyCycle: Float = 0.5f //d
 const val phase: Float = 0.0f //ф
 
@@ -32,11 +32,11 @@ fun main() {
 	val signal2 = generateSineWave(frequency = 400.0f)
 	val signal3 = generateSineWave(frequency = 500.0f)
 
-	val signal = signal1.zip(signal2) { a, b ->
+	val signal = normalizeAmplitudes(signal1.zip(signal2) { a, b ->
 		a + b
 	}.toFloatArray().zip(signal3) { a, b ->
 		a + b
-	}.toFloatArray()
+	}.toFloatArray())
 
 	saveWav(origDir, "orig1", signal1)
 	saveWav(origDir, "orig2", signal2)
@@ -63,8 +63,8 @@ fun main() {
 
 		deconstructedSignal
 	} else {
-		val deconstructedSignal = fft(signal)
-		val reconstructedSignal = ifft(deconstructedSignal)
+		val deconstructedSignal = fft(signal, signal.size)
+		val reconstructedSignal = ifft(deconstructedSignal, signal.size)
 
 		saveWav(recoDir, "reco_fft", reconstructedSignal)
 		saveTimePlot(recoDir, "reco_fft", reconstructedSignal, "RECO FFT")
@@ -90,9 +90,9 @@ fun main() {
 		spectrum, passIn = 350.0f..450.0f
 	)
 
-	val lowPassSignal = normalizeAmplitudes(ifft(lowPassFiltered))
-	val highPassSignal = normalizeAmplitudes(ifft(highPassFiltered))
-	val bandPassSignal = normalizeAmplitudes(ifft(bandPassFiltered))
+	val lowPassSignal = normalizeAmplitudes(ifft(lowPassFiltered, signal.size))
+	val highPassSignal = normalizeAmplitudes(ifft(highPassFiltered, signal.size))
+	val bandPassSignal = normalizeAmplitudes(ifft(bandPassFiltered, signal.size))
 
 	saveTimePlot(filterDir, "sound_low_pass", lowPassSignal, "Low Pass")
 	saveTimePlot(filterDir, "sound_high_pass", highPassSignal, "High Pass")
