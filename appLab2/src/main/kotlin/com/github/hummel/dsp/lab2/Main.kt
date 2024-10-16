@@ -48,7 +48,7 @@ fun main() {
 	val input = readln()
 
 	val spectrum = if (input.lowercase() == "dft") {
-		require(signal.size < 4096) { "Too large sample rate for this non-optimized method." }
+		require(signal.size <= 4096) { "Too large sample rate for this non-optimized method." }
 
 		val deconstructedSignal = dft(signal)
 		val reconstructedSignal = idft(deconstructedSignal)
