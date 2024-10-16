@@ -21,8 +21,8 @@ const val amplitude: Float = 0.2f
 val skip: Int = ceil(sampleRate / 2048.0f).coerceAtLeast(1.0f).toInt()
 
 fun main() {
-	val soundsDir = mdIfNot("output/sounds")
-	val graphsDir = mdIfNot("output/graphs")
+	val origDir = mdIfNot("output/orig")
+	val recoDir = mdIfNot("output/reco")
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
@@ -36,8 +36,13 @@ fun main() {
 		a + b
 	}.toFloatArray()
 
-	saveWav(soundsDir, "orig", signal)
-	saveTimePlot(graphsDir, "orig", signal, "ORIG")
+	saveWav(origDir, "orig1", signal1)
+	saveWav(origDir, "orig2", signal2)
+	saveWav(origDir, "orig3", signal3)
+
+	saveWav(origDir, "orig", signal)
+
+	saveTimePlot(origDir, "orig", signal, "ORIG")
 
 	println("Which mode: «dft» or «fft»?")
 	val input = readln()
@@ -48,8 +53,8 @@ fun main() {
 		val deconstructedSignal = dft(signal)
 		val reconstructedSignal = idft(deconstructedSignal)
 
-		saveWav(soundsDir, "reco_dft", reconstructedSignal)
-		saveTimePlot(graphsDir, "reco_dft", reconstructedSignal, "RECO DFT")
+		saveWav(recoDir, "reco_dft", reconstructedSignal)
+		saveTimePlot(recoDir, "reco_dft", reconstructedSignal, "RECO DFT")
 
 		val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
 		println("Average BFT Reconstruction Error: ${"%.8f".format(error)}")
@@ -59,8 +64,8 @@ fun main() {
 		val deconstructedSignal = fft(signal)
 		val reconstructedSignal = ifft(deconstructedSignal)
 
-		saveWav(soundsDir, "reco_fft", reconstructedSignal)
-		saveTimePlot(graphsDir, "reco_fft", reconstructedSignal, "RECO FFT")
+		saveWav(recoDir, "reco_fft", reconstructedSignal)
+		saveTimePlot(recoDir, "reco_fft", reconstructedSignal, "RECO FFT")
 
 		val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
 		println("Average FFT Reconstruction Error: ${"%.8f".format(error)}")
@@ -91,9 +96,9 @@ fun main() {
 	saveTimePlot(filterDir, "sound_high_pass", highPassSignal, "High Pass")
 	saveTimePlot(filterDir, "sound_band_pass", bandPassSignal, "Band Pass")
 
-	saveWav(soundsDir, "low_pass", lowPassSignal)
-	saveWav(soundsDir, "high_pass", highPassSignal)
-	saveWav(soundsDir, "band_pass", bandPassSignal)
+	saveWav(filterDir, "low_pass", lowPassSignal)
+	saveWav(filterDir, "high_pass", highPassSignal)
+	saveWav(filterDir, "band_pass", bandPassSignal)
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
