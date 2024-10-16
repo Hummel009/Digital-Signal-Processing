@@ -117,7 +117,7 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 
 private fun saveFreqPlot(dir: File, filename: String, signal: FloatArray, title: String) {
 	val xData = (0 until signal.size step skip).map {
-		(it * sampleRate / signal.size).toDouble()
+		it.toDouble() * sampleRate / signal.size
 	}
 	val yData = signal.filterIndexed { index, _ ->
 		index % skip == 0
