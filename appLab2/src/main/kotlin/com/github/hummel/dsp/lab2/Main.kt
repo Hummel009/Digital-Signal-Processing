@@ -13,15 +13,12 @@ import kotlin.math.ceil
 
 const val PI: Float = 3.141592653589793f
 
-const val sampleRate: Int = 44100 //N
+const val duration: Int = 2
+const val sampleRate: Int = 2048 //N
 const val phase: Float = 0.0f //ф
-const val amplitude: Float = 0.5f
+const val amplitude: Float = 0.2f
 
-val skip: Int = ceil(sampleRate / 440.0f).coerceAtLeast(1.0f).toInt()
-
-const val a: Float = 1.0f
-const val b: Float = 2.0f
-const val c: Float = 1.0f
+val skip: Int = ceil(sampleRate / 2048.0f).coerceAtLeast(1.0f).toInt()
 
 fun main() {
 	val soundsDir = mdIfNot("output/sounds")
@@ -29,46 +26,43 @@ fun main() {
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
-	val signal = generateSineWave(
-		duration = a.toInt(), frequency = 1000.0f
-	) + generateSineWave(
-		duration = b.toInt(), frequency = 3000.0f
-	) + generateSineWave(
-		duration = c.toInt(), frequency = 5000.0f
-	)
+	val signal1 = generateSineWave(300.0f)
+	val signal2 = generateSineWave(400.0f)
+	val signal3 = generateSineWave(500.0f)
 
-	val originalSize = signal.size
-	val nearestPowerOfTwo = 1 shl (32 - Integer.numberOfLeadingZeros(originalSize - 1))
-	val paddedSignal = FloatArray(nearestPowerOfTwo)
-	signal.copyInto(paddedSignal)
+	val signal = signal1.zip(signal2) { a, b ->
+		a + b
+	}.toFloatArray().zip(signal3) { a, b ->
+		a + b
+	}.toFloatArray()
 
-	saveWav(soundsDir, "orig", paddedSignal)
-	saveTimePlot(graphsDir, "orig", paddedSignal, "ORIG")
+	saveWav(soundsDir, "orig", signal)
+	saveTimePlot(graphsDir, "orig", signal, "ORIG")
 
 	println("Which mode: «dft» or «fft»?")
 	val input = readln()
 
 	val spectrum = if (input.lowercase() == "dft") {
-		require(paddedSignal.size < 5000) { "Too large sample rate for this non-optimized method." }
+		require(signal.size < 5000) { "Too large sample rate for this non-optimized method." }
 
-		val deconstructedSignal = dft(paddedSignal)
+		val deconstructedSignal = dft(signal)
 		val reconstructedSignal = idft(deconstructedSignal)
 
 		saveWav(soundsDir, "reco_dft", reconstructedSignal)
 		saveTimePlot(graphsDir, "reco_dft", reconstructedSignal, "RECO DFT")
 
-		val error = paddedSignal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
+		val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
 		println("Average BFT Reconstruction Error: ${"%.8f".format(error)}")
 
 		deconstructedSignal
 	} else {
-		val deconstructedSignal = fft(paddedSignal)
+		val deconstructedSignal = fft(signal)
 		val reconstructedSignal = ifft(deconstructedSignal)
 
 		saveWav(soundsDir, "reco_fft", reconstructedSignal)
 		saveTimePlot(graphsDir, "reco_fft", reconstructedSignal, "RECO FFT")
 
-		val error = paddedSignal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
+		val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
 		println("Average FFT Reconstruction Error: ${"%.8f".format(error)}")
 
 		deconstructedSignal
@@ -76,40 +70,17 @@ fun main() {
 
 	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum.copyOf())
 
-	var lastNotZeroVal = 0.0f
 	saveFreqPlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
 	saveFreqPlot(spectrumDir, "phase", phaseSpectrum, "Phase")
-	saveTimePlot(spectrumDir, "frequency", spectrum.copyOf().mapIndexed { index, complex ->
-		if (complex != Complex(0.0f, 0.0f)) {
-			lastNotZeroVal = index * sampleRate.toFloat() / spectrum.size
-			lastNotZeroVal
-		} else 0.0f
-	}.toFloatArray(), "Frequency")
 
 	val lowPassFiltered = lowPassFilter(
-		spectrum, passUntil = lastNotZeroVal * a / (a + b + c)
+		spectrum, passUntil = 350.0f
 	)
 	val highPassFiltered = highPassFilter(
-		spectrum, passFrom = lastNotZeroVal * (a + b) / (a + b + c)
+		spectrum, passFrom = 450.0f
 	)
 	val bandPassFiltered = bandPassFilter(
-		spectrum, passIn = lastNotZeroVal * a / (a + b + c)..lastNotZeroVal * (a + b) / (a + b + c)
-	)
-
-	saveTimePlot(
-		filterDir, "freq_low_pass", lowPassFiltered.copyOf().mapIndexed { index, complex ->
-			if (complex != Complex(0.0f, 0.0f)) index * sampleRate.toFloat() / spectrum.size else 0.0f
-		}.toFloatArray(), "Frequency"
-	)
-	saveTimePlot(
-		filterDir, "freq_high_pass", highPassFiltered.copyOf().mapIndexed { index, complex ->
-			if (complex != Complex(0.0f, 0.0f)) index * sampleRate.toFloat() / spectrum.size else 0.0f
-		}.toFloatArray(), "Frequency"
-	)
-	saveTimePlot(
-		filterDir, "freq_band_pass", bandPassFiltered.copyOf().mapIndexed { index, complex ->
-			if (complex != Complex(0.0f, 0.0f)) index * sampleRate.toFloat() / spectrum.size else 0.0f
-		}.toFloatArray(), "Frequency"
+		spectrum, passIn = 350.0f..450.0f
 	)
 
 	val lowPassSignal = ifft(lowPassFiltered)
