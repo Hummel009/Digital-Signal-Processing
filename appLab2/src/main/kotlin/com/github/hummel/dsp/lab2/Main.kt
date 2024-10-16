@@ -115,24 +115,29 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename + ".wav"))
 }
 
-private fun saveFreqPlot(dir: File, filename: String, spectrum: FloatArray, title: String) {
-	val frequencies = (0 until spectrum.size step skip).map {
-		(it * sampleRate / spectrum.size).toDouble()
+private fun saveFreqPlot(dir: File, filename: String, signal: FloatArray, title: String) {
+	val xData = (0 until signal.size step skip).map {
+		(it * sampleRate / signal.size).toDouble()
+	}
+	val yData = signal.filterIndexed { index, _ ->
+		index % skip == 0
 	}
 
 	val chart = XYChart(1600, 900)
 	chart.title = title
-	chart.xAxisTitle = "Frequency"
+	chart.xAxisTitle = "Frequency (Hz)"
 	chart.yAxisTitle = title
-	chart.addSeries(
-		title, frequencies, spectrum.filterIndexed { index, _ -> index % skip == 0 }.toList()
-	)
+	chart.addSeries(title, xData, yData)
 	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
 }
 
 private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String) {
-	val xData = (0 until signal.size step skip).map { it.toDouble() / sampleRate }
-	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
+	val xData = (0 until signal.size step skip).map {
+		it.toDouble() / sampleRate
+	}
+	val yData = signal.filterIndexed { index, _ ->
+		index % skip == 0
+	}
 
 	val chart = XYChart(1600, 900)
 	chart.title = title
