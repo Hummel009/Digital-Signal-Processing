@@ -45,5 +45,5 @@ fun bandPassFilter(
 fun normalizeAmplitudes(signal: FloatArray): FloatArray {
 	val maxAmplitude = signal.maxOf { it }
 
-	return signal.map { it / maxAmplitude * amplitude }.toFloatArray()
+	return signal.map { it / maxAmplitude * defaultAmplitude }.toFloatArray()
 }

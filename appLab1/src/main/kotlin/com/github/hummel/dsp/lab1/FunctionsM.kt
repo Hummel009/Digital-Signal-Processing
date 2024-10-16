@@ -4,37 +4,37 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 fun generateSineModulator(
-	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
+	duration: Int = defaultDuration, amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
 ): FloatArray {
-	return FloatArray(samples) { n ->
-		val value = 2 * PI * modFrequency * n / sampleRate + phase
-		modAmplitude * sin(value)
+	return FloatArray(duration * sampleRate) { n ->
+		val value = 2 * PI * frequency * n / sampleRate + phase
+		amplitude * sin(value)
 	}
 }
 
 fun generatePulseModulator(
-	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
+	duration: Int = defaultDuration, amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
 ): FloatArray {
-	return FloatArray(samples) { n ->
-		val value = 2 * PI * modFrequency * n / sampleRate + phase
-		if (value % (2 * PI) / (2 * PI) <= dutyCycle) modAmplitude else -modAmplitude
+	return FloatArray(duration * sampleRate) { n ->
+		val value = 2 * PI * frequency * n / sampleRate + phase
+		if (value % (2 * PI) / (2 * PI) <= dutyCycle) amplitude else -amplitude
 	}
 }
 
 fun generateTriangleModulator(
-	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
+	duration: Int = defaultDuration, amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
 ): FloatArray {
-	return FloatArray(samples) { n ->
-		val value = 2 * PI * modFrequency * n / sampleRate + phase
-		(2 * modAmplitude / PI) * (abs((value + 3 * PI / 2) % (2 * PI) - PI) - (PI / 2))
+	return FloatArray(duration * sampleRate) { n ->
+		val value = 2 * PI * frequency * n / sampleRate + phase
+		(2 * amplitude / PI) * (abs((value + 3 * PI / 2) % (2 * PI) - PI) - (PI / 2))
 	}
 }
 
 fun generateSawtoothModulator(
-	modAmplitude: Float = modulatorAmplitude, modFrequency: Float = modulatorFrequency
+	duration: Int = defaultDuration, amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
 ): FloatArray {
-	return FloatArray(samples) { n ->
-		val value = 2 * PI * modFrequency * n / sampleRate + phase
-		(modAmplitude / PI) * ((value + PI) % (2 * PI) - PI)
+	return FloatArray(duration * sampleRate) { n ->
+		val value = 2 * PI * frequency * n / sampleRate + phase
+		(amplitude / PI) * ((value + PI) % (2 * PI) - PI)
 	}
 }

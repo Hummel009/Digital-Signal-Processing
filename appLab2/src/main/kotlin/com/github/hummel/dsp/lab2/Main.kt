@@ -13,10 +13,12 @@ import kotlin.math.ceil
 
 const val PI: Float = 3.141592653589793f
 
-const val duration: Int = 2
 const val sampleRate: Int = 44100 //N
+const val dutyCycle: Float = 0.5f //d
 const val phase: Float = 0.0f //ф
-const val amplitude: Float = 0.2f
+
+const val defaultAmplitude: Float = 0.2f //A
+const val defaultDuration: Int = 2 //sec
 
 val skip: Int = ceil(sampleRate / 2048.0f).coerceAtLeast(1.0f).toInt()
 
@@ -26,9 +28,9 @@ fun main() {
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
-	val signal1 = generateSineWave(1000.0f)
-	val signal2 = generateSineWave(2000.0f)
-	val signal3 = generateSineWave(3000.0f)
+	val signal1 = generateSineWave(frequency = 1000.0f)
+	val signal2 = generateSineWave(frequency = 2000.0f)
+	val signal3 = generateSineWave(frequency = 3000.0f)
 
 	val signal = signal1.zip(signal2) { a, b ->
 		a + b
@@ -73,7 +75,7 @@ fun main() {
 		deconstructedSignal
 	}
 
-	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum.copyOf())
+	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum)
 
 	saveFreqPlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
 	saveFreqPlot(spectrumDir, "phase", phaseSpectrum, "Phase")

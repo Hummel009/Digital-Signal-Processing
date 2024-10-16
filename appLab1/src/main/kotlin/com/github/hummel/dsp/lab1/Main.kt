@@ -6,24 +6,25 @@ import org.knowm.xchart.XYChart
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.*
+import kotlin.math.ceil
 
 //https://www.desmos.com/calculator/vmgatudfmf?lang=ru
 
 const val PI: Float = 3.141592653589793f
 
-const val duration: Float = 5.0f //sec
-
-const val sampleRate: Float = 44100.0f //N
+const val sampleRate: Int = 2048 //N
 const val dutyCycle: Float = 0.5f //d
 const val phase: Float = 0.0f //ф
 
-var defaultAmplitude: Float = 0.5f //A
-var defaultFrequency: Float = 880.0f //f
+const val defaultAmplitude: Float = 0.5f //A
+const val defaultFrequency: Float = 880.0f //f
 
-var modulatorAmplitude: Float = 0.25f // A
-var modulatorFrequency: Float = 1.0f // f
+const val modulatorAmplitude: Float = 0.25f // A
+const val modulatorFrequency: Float = 1.0f // f
 
-const val samples: Int = (sampleRate * duration).toInt()
+const val defaultDuration: Int = 2 //sec
+
+val skip: Int = ceil(sampleRate / 2048.0f).coerceAtLeast(1.0f).toInt()
 
 fun main() {
 	val origSoundsDir = mdIfNot("output/orig_sounds")
@@ -84,8 +85,8 @@ fun main() {
 	saveTimePlot(origGraphsDir, "polyphonic", noise, "Polyphonic")
 
 	val cautionModulator1 = generatePulseModulator()
-	val cautionModulator2 = generateTriangleModulator(modFrequency = modulatorFrequency * 3.0f)
-	val cautionModulator3 = generateSawtoothModulator(modFrequency = modulatorFrequency * 1.5f)
+	val cautionModulator2 = generateTriangleModulator(frequency = modulatorFrequency * 3.0f)
+	val cautionModulator3 = generateSawtoothModulator(frequency = modulatorFrequency * 1.5f)
 
 	var moddedWave0 = modulateFrequencySineWave(modulator = cautionModulator2)
 	var moddedWave1 = modulateFrequencySineWave(modulator = cautionModulator1)
@@ -96,7 +97,7 @@ fun main() {
 }
 
 private fun saveWav(dir: File, filename: String, signal: FloatArray) {
-	val audioFormat = AudioFormat(sampleRate, 16, 1, true, false)
+	val audioFormat = AudioFormat(sampleRate.toFloat(), 16, 1, true, false)
 	val data = ByteArray(signal.size * 2)
 	for (i in signal.indices) {
 		val value = (signal[i] * Short.MAX_VALUE).toInt().toShort()
@@ -109,14 +110,18 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 	AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, File(dir.path + "/" + filename + ".wav"))
 }
 
-private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String, skip: Int = 100) {
-	val xData = (0 until signal.size step skip).map { it.toDouble() / signal.size * duration }
-	val yData = signal.filterIndexed { index, _ -> index % skip == 0 }.map { it.toDouble() }
+private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String) {
+	val xData = (0 until signal.size step skip).map {
+		it.toDouble() / sampleRate
+	}
+	val yData = signal.filterIndexed { index, _ ->
+		index % skip == 0
+	}
 
 	val chart = XYChart(1600, 900)
 	chart.title = title
 	chart.xAxisTitle = "Time (s)"
-	chart.yAxisTitle = "Amplitude"
+	chart.yAxisTitle = title
 	chart.addSeries(title, xData, yData)
 	BitmapEncoder.saveBitmap(chart, dir.path + "/" + filename, BitmapFormat.JPG)
 }
