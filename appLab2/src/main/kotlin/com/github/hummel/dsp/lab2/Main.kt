@@ -88,9 +88,9 @@ fun main() {
 		spectrum, passIn = 350.0f..450.0f
 	)
 
-	val lowPassSignal = ifft(lowPassFiltered)
-	val highPassSignal = ifft(highPassFiltered)
-	val bandPassSignal = ifft(bandPassFiltered)
+	val lowPassSignal = normalizeAmplitudes(ifft(lowPassFiltered))
+	val highPassSignal = normalizeAmplitudes(ifft(highPassFiltered))
+	val bandPassSignal = normalizeAmplitudes(ifft(bandPassFiltered))
 
 	saveTimePlot(filterDir, "sound_low_pass", lowPassSignal, "Low Pass")
 	saveTimePlot(filterDir, "sound_high_pass", highPassSignal, "High Pass")

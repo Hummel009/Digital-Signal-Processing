@@ -26,3 +26,9 @@ fun bandPassFilter(
 		if (frequency in passIn) complex else Complex(0.0f, 0.0f)
 	}.toTypedArray()
 }
+
+fun normalizeAmplitudes(signal: FloatArray): FloatArray {
+	val maxAmplitude = signal.maxOf { it }
+
+	return signal.map { it / maxAmplitude * amplitude }.toFloatArray()
+}
