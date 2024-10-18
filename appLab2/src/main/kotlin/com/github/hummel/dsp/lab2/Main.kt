@@ -13,7 +13,7 @@ import kotlin.math.ceil
 
 const val PI: Float = 3.141592653589793f
 
-const val sampleRate: Int = 2048 //N
+const val sampleRate: Int = 44100 //N
 const val dutyCycle: Float = 0.5f //d
 const val phase: Float = 0.0f //ф
 
@@ -25,7 +25,6 @@ val skip: Int = ceil(sampleRate / 2048.0f).coerceAtLeast(1.0f).toInt()
 
 fun main() {
 	val origDir = mdIfNot("output/orig")
-	val recoDir = mdIfNot("output/reco")
 	val spectrumDir = mdIfNot("output/spectrum")
 	val filterDir = mdIfNot("output/filter")
 
@@ -60,8 +59,8 @@ fun main() {
 	val deconstructedSignal = transform(signal)
 	val reconstructedSignal = transformInverse(deconstructedSignal)
 
-	saveWav(recoDir, "reco_dft", reconstructedSignal)
-	saveTimePlot(recoDir, "reco_dft", reconstructedSignal, "RECO DFT")
+	saveWav(origDir, "reco", reconstructedSignal)
+	saveTimePlot(origDir, "reco", reconstructedSignal, "RECO")
 
 	val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
 	println("Average Reconstruction Error: ${"%.8f".format(error)}")
