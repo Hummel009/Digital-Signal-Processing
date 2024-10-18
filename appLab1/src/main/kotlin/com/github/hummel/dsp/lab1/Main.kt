@@ -22,7 +22,7 @@ const val defaultFrequency: Float = 880.0f //f
 const val modulatorAmplitude: Float = 0.25f // A
 const val modulatorFrequency: Float = 1.0f // f
 
-const val defaultDuration: Int = 2 //sec
+const val duration: Int = 2 //sec
 
 val skip: Int = ceil(sampleRate / 2048.0f).coerceAtLeast(1.0f).toInt()
 

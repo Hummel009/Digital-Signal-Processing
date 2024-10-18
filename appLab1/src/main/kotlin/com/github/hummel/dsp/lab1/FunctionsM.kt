@@ -4,7 +4,7 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 fun generateSineModulator(
-	duration: Int = defaultDuration, amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
+	amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
 ): FloatArray {
 	return FloatArray(duration * sampleRate) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
@@ -13,7 +13,7 @@ fun generateSineModulator(
 }
 
 fun generatePulseModulator(
-	duration: Int = defaultDuration, amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
+	amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
 ): FloatArray {
 	return FloatArray(duration * sampleRate) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
@@ -22,7 +22,7 @@ fun generatePulseModulator(
 }
 
 fun generateTriangleModulator(
-	duration: Int = defaultDuration, amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
+	amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
 ): FloatArray {
 	return FloatArray(duration * sampleRate) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
@@ -31,7 +31,7 @@ fun generateTriangleModulator(
 }
 
 fun generateSawtoothModulator(
-	duration: Int = defaultDuration, amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
+	amplitude: Float = modulatorAmplitude, frequency: Float = modulatorFrequency
 ): FloatArray {
 	return FloatArray(duration * sampleRate) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase

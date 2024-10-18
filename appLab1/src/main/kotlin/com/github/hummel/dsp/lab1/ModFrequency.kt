@@ -4,7 +4,6 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 fun modulateFrequencySineWave(
-	duration: Int = defaultDuration,
 	amplitude: Float = defaultAmplitude,
 	frequency: Float = defaultFrequency,
 	modulator: FloatArray
@@ -19,7 +18,6 @@ fun modulateFrequencySineWave(
 }
 
 fun modulateFrequencyPulseWave(
-	duration: Int = defaultDuration,
 	amplitude: Float = defaultAmplitude,
 	frequency: Float = defaultFrequency,
 	modulator: FloatArray
@@ -34,7 +32,6 @@ fun modulateFrequencyPulseWave(
 }
 
 fun modulateFrequencyTriangleWave(
-	duration: Int = defaultDuration,
 	amplitude: Float = defaultAmplitude,
 	frequency: Float = defaultFrequency,
 	modulator: FloatArray
@@ -49,7 +46,6 @@ fun modulateFrequencyTriangleWave(
 }
 
 fun modulateFrequencySawtoothWave(
-	duration: Int = defaultDuration,
 	amplitude: Float = defaultAmplitude,
 	frequency: Float = defaultFrequency,
 	modulator: FloatArray

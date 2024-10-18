@@ -6,7 +6,7 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 fun generateSineWave(
-	duration: Int = defaultDuration, amplitude: Float = defaultAmplitude, frequency: Float
+	amplitude: Float = defaultAmplitude, frequency: Float
 ): FloatArray {
 	return FloatArray(duration * sampleRate) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
@@ -15,7 +15,7 @@ fun generateSineWave(
 }
 
 fun generatePulseWave(
-	duration: Int = defaultDuration, amplitude: Float = defaultAmplitude, frequency: Float
+	amplitude: Float = defaultAmplitude, frequency: Float
 ): FloatArray {
 	return FloatArray(duration * sampleRate) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
@@ -24,7 +24,7 @@ fun generatePulseWave(
 }
 
 fun generateTriangleWave(
-	duration: Int = defaultDuration, amplitude: Float = defaultAmplitude, frequency: Float
+	amplitude: Float = defaultAmplitude, frequency: Float
 ): FloatArray {
 	return FloatArray(duration * sampleRate) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
@@ -33,7 +33,7 @@ fun generateTriangleWave(
 }
 
 fun generateSawtoothWave(
-	duration: Int = defaultDuration, amplitude: Float = defaultAmplitude, frequency: Float
+	amplitude: Float = defaultAmplitude, frequency: Float
 ): FloatArray {
 	return FloatArray(duration * sampleRate) { n ->
 		val value = 2 * PI * frequency * n / sampleRate + phase
@@ -42,7 +42,7 @@ fun generateSawtoothWave(
 }
 
 fun generateNoise(
-	duration: Int = defaultDuration, amplitude: Float = defaultAmplitude
+	amplitude: Float = defaultAmplitude
 ): FloatArray {
 	return FloatArray(duration * sampleRate) {
 		amplitude * (Math.random().toFloat() * 2 - 1)

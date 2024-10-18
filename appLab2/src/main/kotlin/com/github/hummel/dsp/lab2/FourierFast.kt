@@ -3,8 +3,8 @@ package com.github.hummel.dsp.lab2
 import kotlin.math.cos
 import kotlin.math.sin
 
-fun fft(signal: FloatArray, signalSize: Int): Array<Complex> {
-	val squareLength = 1 shl (32 - Integer.numberOfLeadingZeros(signalSize - 1))
+fun fft(signal: FloatArray): Array<Complex> {
+	val squareLength = 1 shl (32 - Integer.numberOfLeadingZeros(sampleRate * duration - 1))
 
 	val paddedSignal = FloatArray(squareLength) { 0.0f }
 	signal.copyInto(paddedSignal)
@@ -16,12 +16,12 @@ fun fft(signal: FloatArray, signalSize: Int): Array<Complex> {
 	return spectrum
 }
 
-fun ifft(spectrum: Array<Complex>, signalSize: Int): FloatArray {
+fun ifft(spectrum: Array<Complex>): FloatArray {
 	val spectrumView = fftRecursion(spectrum, true)
 
 	val paddedSignal = spectrumView.map { it.real }.toFloatArray()
 
-	val signal = paddedSignal.take(signalSize).toFloatArray()
+	val signal = paddedSignal.take(duration * sampleRate).toFloatArray()
 
 	return signal
 }

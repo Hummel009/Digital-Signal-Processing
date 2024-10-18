@@ -13,12 +13,13 @@ import kotlin.math.ceil
 
 const val PI: Float = 3.141592653589793f
 
-const val sampleRate: Int = 44100 //N
+const val sampleRate: Int = 2048 //N
 const val dutyCycle: Float = 0.5f //d
 const val phase: Float = 0.0f //ф
 
 const val defaultAmplitude: Float = 0.2f //A
-const val defaultDuration: Int = 2 //sec
+
+const val duration: Int = 2 //sec
 
 val skip: Int = ceil(sampleRate / 2048.0f).coerceAtLeast(1.0f).toInt()
 
@@ -49,35 +50,27 @@ fun main() {
 	println("Which mode: «dft» or «fft»?")
 	val input = readln()
 
-	val spectrum = if (input.lowercase() == "dft") {
+	if (input.lowercase() == "dft") {
 		require(signal.size <= 4096) { "Too large sample rate for this non-optimized method." }
-
-		val deconstructedSignal = dft(signal)
-		val reconstructedSignal = idft(deconstructedSignal)
-
-		saveWav(recoDir, "reco_dft", reconstructedSignal)
-		saveTimePlot(recoDir, "reco_dft", reconstructedSignal, "RECO DFT")
-
-		val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-		println("Average BFT Reconstruction Error: ${"%.8f".format(error)}")
-
-		deconstructedSignal
-	} else {
-		val deconstructedSignal = fft(signal, signal.size)
-		val reconstructedSignal = ifft(deconstructedSignal, signal.size)
-
-		saveWav(recoDir, "reco_fft", reconstructedSignal)
-		saveTimePlot(recoDir, "reco_fft", reconstructedSignal, "RECO FFT")
-
-		val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
-		println("Average FFT Reconstruction Error: ${"%.8f".format(error)}")
-
-		deconstructedSignal
 	}
+
+	val transform = if (input.lowercase() == "dft") ::dft else ::fft
+	val transformInverse = if (input.lowercase() == "dft") ::idft else ::ifft
+
+	val deconstructedSignal = transform(signal)
+	val reconstructedSignal = transformInverse(deconstructedSignal)
+
+	saveWav(recoDir, "reco_dft", reconstructedSignal)
+	saveTimePlot(recoDir, "reco_dft", reconstructedSignal, "RECO DFT")
+
+	val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
+	println("Average Reconstruction Error: ${"%.8f".format(error)}")
+
+	val spectrum = deconstructedSignal
 
 	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum)
 
-	saveFreqPlot(spectrumDir, "amplitude", amplitudeSpectrum, "Amplitude")
+	saveFreqPlot(spectrumDir, "amplitude", normalizeAmplitudes(amplitudeSpectrum), "Amplitude")
 	saveFreqPlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 
 	val lowPassFiltered = lowPassFilter(
@@ -90,9 +83,9 @@ fun main() {
 		spectrum, passIn = 350.0f..450.0f
 	)
 
-	val lowPassSignal = normalizeAmplitudes(ifft(lowPassFiltered, signal.size))
-	val highPassSignal = normalizeAmplitudes(ifft(highPassFiltered, signal.size))
-	val bandPassSignal = normalizeAmplitudes(ifft(bandPassFiltered, signal.size))
+	val lowPassSignal = normalizeAmplitudes(transformInverse(lowPassFiltered))
+	val highPassSignal = normalizeAmplitudes(transformInverse(highPassFiltered))
+	val bandPassSignal = normalizeAmplitudes(transformInverse(bandPassFiltered))
 
 	saveTimePlot(filterDir, "sound_low_pass", lowPassSignal, "Low Pass")
 	saveTimePlot(filterDir, "sound_high_pass", highPassSignal, "High Pass")
