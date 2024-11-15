@@ -90,21 +90,21 @@ fun processAutoCorrelation(originalImage: BufferedImage): BufferedImage {
 
 	for (x in 0 until width) {
 		for (y in 0 until height) {
-			var S = 0.0
-			var F = 0.0 // dispersion for one
-			var G = 0.0 // dispersion for last
+			var s = 0.0
+			var f = 0.0 // dispersion for one
+			var g = 0.0 // dispersion for last
 
 			for (i in x - xC until x + xC) {
 				for (j in y - yC until y + yC) {
-					if (i < 0 || j < 0 || i >= width || j >= height) continue
+					if (i !in 0 until width || j !in 0 until height) continue
 
-					S += originalGrayArray[i][j] * originalGrayArray[i + xC - x][j + yC - y]
-					F += originalGrayArray[i][j].toDouble().pow(2)
-					G += originalGrayArray[i + xC - x][j + yC - y].toDouble().pow(2)
+					s += originalGrayArray[i][j] * originalGrayArray[i + xC - x][j + yC - y]
+					f += originalGrayArray[i][j].toDouble().pow(2)
+					g += originalGrayArray[i + xC - x][j + yC - y].toDouble().pow(2)
 				}
 			}
 
-			resultImgArray[x][y] = maxOf(S / sqrt(F * G), 0.0).toFloat()
+			resultImgArray[x][y] = maxOf(s / sqrt(f * g), 0.0).toFloat()
 		}
 	}
 
