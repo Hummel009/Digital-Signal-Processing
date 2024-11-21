@@ -5,12 +5,15 @@ import org.knowm.xchart.BitmapEncoder.BitmapFormat
 import org.knowm.xchart.XYChart
 import java.io.ByteArrayInputStream
 import java.io.File
-import javax.sound.sampled.*
+import javax.sound.sampled.AudioFileFormat
+import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioInputStream
+import javax.sound.sampled.AudioSystem
 import kotlin.math.ceil
 
 //https://www.desmos.com/calculator/vmgatudfmf?lang=ru
 
-const val PI: Float = 3.141592653589793f
+const val PI: Float = 3.1415927f
 
 const val sampleRate: Int = 2048 //N
 const val dutyCycle: Float = 0.5f //d
@@ -36,22 +39,22 @@ fun main() {
 
 	val input = readln()
 
-	var sineWave = generateSineWave()
-	var pulseWave = generatePulseWave()
-	var triangleWave = generateTriangleWave()
-	var sawtoothWave = generateSawtoothWave()
-	var noise = generateNoise()
-	var polyphonic = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
+	val sineWave = generateSineWave()
+	val pulseWave = generatePulseWave()
+	val triangleWave = generateTriangleWave()
+	val sawtoothWave = generateSawtoothWave()
+	val noise = generateNoise()
+	val polyphonic = noise.zip(sawtoothWave) { a, b -> a + b }.toFloatArray()
 
-	var sineModulator = generateSineModulator()
-	var pulseModulator = generatePulseModulator()
-	var triangleModulator = generateTriangleModulator()
-	var sawtoothModulator = generateSawtoothModulator()
+	val sineModulator = generateSineModulator()
+	val pulseModulator = generatePulseModulator()
+	val triangleModulator = generateTriangleModulator()
+	val sawtoothModulator = generateSawtoothModulator()
 
-	var moddedSineWave: FloatArray
-	var moddedPulseWave: FloatArray
-	var moddedTriangleWave: FloatArray
-	var moddedSawtoothWave: FloatArray
+	val moddedSineWave: FloatArray
+	val moddedPulseWave: FloatArray
+	val moddedTriangleWave: FloatArray
+	val moddedSawtoothWave: FloatArray
 
 	if (input.lowercase() == "amplitude") {
 		moddedSineWave = modulateAmplitude(sineWave, sineModulator)
@@ -88,9 +91,9 @@ fun main() {
 	val cautionModulator2 = generateTriangleModulator(frequency = modulatorFrequency * 3.0f)
 	val cautionModulator3 = generateSawtoothModulator(frequency = modulatorFrequency * 1.5f)
 
-	var moddedWave0 = modulateFrequencySineWave(modulator = cautionModulator2)
-	var moddedWave1 = modulateFrequencySineWave(modulator = cautionModulator1)
-	var moddedWave2 = modulateFrequencySineWave(modulator = cautionModulator3)
+	val moddedWave0 = modulateFrequencySineWave(modulator = cautionModulator2)
+	val moddedWave1 = modulateFrequencySineWave(modulator = cautionModulator1)
+	val moddedWave2 = modulateFrequencySineWave(modulator = cautionModulator3)
 
 	saveWav(cautionDir, "caution", moddedWave0 + moddedWave1 + moddedWave2)
 	saveTimePlot(cautionDir, "caution", moddedWave0 + moddedWave1 + moddedWave2, "Caution")
@@ -111,7 +114,7 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 }
 
 private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String) {
-	val xData = (0 until signal.size step skip).map {
+	val xData = (signal.indices step skip).map {
 		it.toDouble() / sampleRate
 	}
 	val yData = signal.filterIndexed { index, _ ->

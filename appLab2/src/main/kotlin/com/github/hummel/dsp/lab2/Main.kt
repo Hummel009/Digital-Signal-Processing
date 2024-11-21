@@ -11,9 +11,9 @@ import kotlin.math.ceil
 
 //https://www.desmos.com/calculator/vmgatudfmf?lang=ru
 
-const val PI: Float = 3.141592653589793f
+const val PI: Float = 3.1415927f
 
-const val sampleRate: Int = 44100 //N
+const val sampleRate: Int = 2048 //N
 const val dutyCycle: Float = 0.5f //d
 const val phase: Float = 0.0f //ф
 
@@ -65,21 +65,19 @@ fun main() {
 	val error = signal.zip(reconstructedSignal) { a, b -> abs(a - b) }.average()
 	println("Average Reconstruction Error: ${"%.8f".format(error)}")
 
-	val spectrum = deconstructedSignal
-
-	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(spectrum)
+	val (amplitudeSpectrum, phaseSpectrum) = decomposeSignal(deconstructedSignal)
 
 	saveFreqPlot(spectrumDir, "amplitude", normalizeAmplitudes(amplitudeSpectrum), "Amplitude")
 	saveFreqPlot(spectrumDir, "phase", phaseSpectrum, "Phase")
 
 	val lowPassFiltered = lowPassFilter(
-		spectrum, passUntil = 350.0f
+		deconstructedSignal, passUntil = 350.0f
 	)
 	val highPassFiltered = highPassFilter(
-		spectrum, passFrom = 450.0f
+		deconstructedSignal, passFrom = 450.0f
 	)
 	val bandPassFiltered = bandPassFilter(
-		spectrum, passIn = 350.0f..450.0f
+		deconstructedSignal, passIn = 350.0f..450.0f
 	)
 
 	val lowPassSignal = normalizeAmplitudes(transformInverse(lowPassFiltered))
@@ -110,7 +108,7 @@ private fun saveWav(dir: File, filename: String, signal: FloatArray) {
 }
 
 private fun saveFreqPlot(dir: File, filename: String, signal: FloatArray, title: String) {
-	val xData = (0 until signal.size step skip).map {
+	val xData = (signal.indices step skip).map {
 		it.toDouble() * sampleRate / signal.size
 	}
 	val yData = signal.filterIndexed { index, _ ->
@@ -126,7 +124,7 @@ private fun saveFreqPlot(dir: File, filename: String, signal: FloatArray, title:
 }
 
 private fun saveTimePlot(dir: File, filename: String, signal: FloatArray, title: String) {
-	val xData = (0 until signal.size step skip).map {
+	val xData = (signal.indices step skip).map {
 		it.toDouble() / sampleRate
 	}
 	val yData = signal.filterIndexed { index, _ ->

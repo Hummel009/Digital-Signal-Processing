@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
-const val PI: Float = 3.141592653589793f
+const val PI: Float = 3.1415927f
 
 const val channels: Int = 3
 
@@ -77,5 +77,5 @@ private fun mdIfNot(path: String): File {
 fun extractDimensions(imageArray: Array<Array<IntArray>>): Pair<Int, Int> {
 	val height = imageArray.size
 	val width = imageArray[0].size
-	return Pair(height, width)
+	return height to width
 }

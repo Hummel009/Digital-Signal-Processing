@@ -39,6 +39,6 @@ data class Complex(val real: Float, val imaginary: Float) {
 	)
 
 	companion object {
-		val ZERO = Complex(0.0f, 0.0f)
+		val ZERO: Complex = Complex(0.0f, 0.0f)
 	}
 }
